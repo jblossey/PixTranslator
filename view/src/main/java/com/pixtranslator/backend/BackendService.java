@@ -2,8 +2,11 @@ package com.pixtranslator.backend;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 
+@Getter
 @Service
 public class BackendService {
 
@@ -37,10 +40,6 @@ public class BackendService {
         employees.add(new Employee(id++, "Glenn", "Bangley", "gbangleyj@prlog.org", "Account Executive"));
         employees.add(new Employee(id++, "Isidoro", "Glave", "iglavek@tamu.edu", "Compensation Analyst"));
         employees.add(new Employee(id++, "Cchaddie", "Spatarul", "cspatarull@sun.com", "Business Systems Development Analyst"));
-    }
-
-    public List<Employee> getEmployees() {
-        return employees;
     }
 
 }

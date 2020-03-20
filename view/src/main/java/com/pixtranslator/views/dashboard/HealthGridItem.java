@@ -1,10 +1,16 @@
 package com.pixtranslator.views.dashboard;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
+
 
 /**
  * Simple DTO class for the inbox list to demonstrate complex object data
  */
+@Setter
+@Getter
 public class HealthGridItem {
 
     private LocalDate itemDate;
@@ -25,43 +31,4 @@ public class HealthGridItem {
         this.theme = theme;
     }
 
-    public LocalDate getItemDate() {
-        return itemDate;
-    }
-
-    public void setItemDate(LocalDate itemDate) {
-        this.itemDate = itemDate;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getTheme() {
-        return theme;
-    }
-
-    public void setTheme(String theme) {
-        this.theme = theme;
-    }
 }

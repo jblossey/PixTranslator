@@ -26,7 +26,7 @@ import com.pixtranslator.views.photolist.PhotoListView;
  */
 @JsModule("./styles/shared-styles.js")
 @CssImport(value = "styles/views/root/root-view.css", themeFor = "vaadin-app-layout")
-@PWA(name = "PixTranslator", shortName = "PixTranslator")
+//@PWA(name = "PixTranslator", shortName = "PixTranslator")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 public class RootView extends AppLayout {
 

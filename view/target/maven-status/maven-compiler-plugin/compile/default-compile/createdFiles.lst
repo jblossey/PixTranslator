@@ -1,0 +1,10 @@
+com/pixtranslator/views/root/RootView.class
+com/pixtranslator/backend/LongToStringEncoder.class
+com/pixtranslator/views/dashboard/WrapperCard.class
+com/pixtranslator/backend/Employee.class
+com/pixtranslator/views/dashboard/HealthGridItem.class
+com/pixtranslator/views/dashboard/DashboardView.class
+com/pixtranslator/backend/BackendService.class
+com/pixtranslator/views/photolist/PhotoListView.class
+com/pixtranslator/Application.class
+com/pixtranslator/views/photolist/Person.class

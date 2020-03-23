@@ -1,0 +1,35 @@
+{
+  "name": "iptc_translator",
+  "version": "0.0.1",
+  "description": "A simple GUI for accessing IPTC Tags and Captions and translating them via the Deepl API",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/JBlossey/iptc_translator.git"
+  },
+  "keywords": [
+    "iptc",
+    "tags",
+    "captions",
+    "jpg",
+    "metadata",
+    "deepl"
+  ],
+  "author": "Jannis Blossey",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/JBlossey/iptc_translator/issues"
+  },
+  "homepage": "https://gitlab.com/JBlossey/iptc_translator#readme",
+  "dependencies": {
+    "electron": "^6.0.10",
+    "fs-jetpack": "^2.2.2",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.4.0"
+  }
+}

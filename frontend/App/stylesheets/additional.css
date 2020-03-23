@@ -1,0 +1,32 @@
+img{
+    border-radius: .5em;
+    padding: .1em;
+    margin: .1em;
+    border: 1px solid #ddd;
+    width: auto;
+    max-height: 5em;
+    vertical-align: middle;
+}
+
+.footer_text{
+    height: 100%;
+    width: auto;
+    text-size-adjust: auto;
+    margin: .5em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#file_list{
+    display: none;
+}
+
+#call_for_drop{
+    position: absolute;
+    top: 33%;
+    width: 100%;
+    height: auto;
+    font-size: 2em;
+    vertical-align: middle;
+    text-align: center;
+}

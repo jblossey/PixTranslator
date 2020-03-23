@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Stylesheets -->
+        <link rel="stylesheet" href="stylesheets/photon.min.css">
+        <title>Provide Deepl Key</title>
+        <script src="./scripts/retrievalWindow.js" charset="utf-8"></script>
+    </head>
+    <body>
+        <div class="window">
+            <div class="window-content" style="margin: 1em">
+                <form>
+                    <div class="form-group">
+                        <label>Please enter your Deepl Key.</label>
+                        <input id="deepl_key_el" type="password" class="form-control" placeholder="Your Deepl Key here..." required>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                          <input id="save_check_el" type="checkbox"> Save Deepl Key (The Key will not be encrypted! Anyone could get it!)
+                        </label>
+                      </div>
+                    <div class="form-actions">
+                        <input type="button" onclick="sendInfo()" class="btn btn-form btn-primary" value="Submit">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,28 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+name: $(Date:yyyyMMdd)_$(TeamProject)__$(SourceBranchName)_$(Rev:r)
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: Build
+    displayName: Build for Windows
+    jobs:
+      - job: BuildBackendWin
+        timeoutInMinutes: 5
+        steps:
+          -script: echo "I build the backend."
+      - job: BuildFrontendWin
+        dependsOn: BuildBackendWin
+        condition: succeeded()
+        timeoutInMinutes: 5
+        steps:
+          -script: echo "I build the frontend."
+

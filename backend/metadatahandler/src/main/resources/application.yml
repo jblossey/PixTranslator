@@ -1,0 +1,6 @@
+server:
+    port: 4711
+
+spring:
+    application:
+        name: Metadatahandler

@@ -62,7 +62,7 @@ public class Metadatareader {
             final List<IptcRecord> iptcData = photoshopMetadata.photoshopApp13Data.getRecords();
             //Collections.sort(iptcData, IptcRecord.COMPARATOR);
             for (final IptcRecord iptcPiece : iptcData) {
-                if (iptcPiece.iptcType.equals(IptcTypes.CAPTION_ABSTRACT)) {
+                if (iptcPiece.iptcType.equals(IptcTypes.CAPTION_ABSTRACT) && iptcCaption.getValue().isEmpty()) {
                     iptcCaption = iptcPiece;
                     log.info("Iptc.Caption: " + iptcCaption.getValue());
                     break;
@@ -87,10 +87,6 @@ public class Metadatareader {
                 log.info("xmp.dc.description: " + dcDescription.getValue());
             } else {
                 log.warn("xmp.dc:description is null!");
-            }
-            XMPProperty photoshopHeadline = picXmp.getProperty("http://ns.adobe.com/photoshop/1.0/", "photoshop:Headline");
-            if (photoshopHeadline != null) {
-                log.info("xmp.photoshop:Headline" + photoshopHeadline.getValue());
             }
             if (dcDescription != null && !dcDescription.getValue().equals(caption)) {
                 log.warn("XMP Caption and Exif Description not alike - XMP: " +

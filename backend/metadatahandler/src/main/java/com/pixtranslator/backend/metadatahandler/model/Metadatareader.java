@@ -121,7 +121,7 @@ public class Metadatareader {
         return caption;
     }
 
-    public static Map<String, Object[]> getKeywordsAndCaptions(final File picture) throws ImageReadException, IOException, XMPException {
+    public static Map<String, Object[]> getKeywordsAndCaption(final File picture) throws ImageReadException, IOException, XMPException {
         Map<String, Object[]> response = new HashMap<>();
         response.put("Keywords", getKeywords(picture).toArray());
         response.put("Caption", new String[]{getCaption(picture)});

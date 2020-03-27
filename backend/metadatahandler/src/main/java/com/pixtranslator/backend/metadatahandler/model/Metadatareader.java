@@ -22,21 +22,40 @@ import java.util.*;
 @Slf4j
 public class Metadatareader {
 
-    public static Set<String> getKeywords(final File picture) throws ImageReadException, IOException {
+    public static Set<String> getKeywords(final File picture) throws ImageReadException, IOException, XMPException {
         Set<String> keywords = new HashSet<>();
         final ImageMetadata metadata = Imaging.getMetadata(picture);
+        final String xmpXmlString = Imaging.getXmpXml(picture);
 
         if (metadata instanceof JpegImageMetadata) {
             final JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
-
-            //Exif
-
             //IPTC
-
-            //XMP
-            // XMPProperty dcSubject = picXmp.getProperty("http://purl.org/dc/elements/1.1/", "dc:subject");
+            IptcRecord iptcCaption = new IptcRecord(IptcTypes.KEYWORDS, "");
+            final JpegPhotoshopMetadata photoshopMetadata = jpegMetadata.getPhotoshop();
+            final List<IptcRecord> iptcData = photoshopMetadata.photoshopApp13Data.getRecords();
+            Collections.sort(iptcData, IptcRecord.COMPARATOR);
+            for (final IptcRecord iptcPiece : iptcData) {
+                if (iptcPiece.iptcType.equals(IptcTypes.KEYWORDS)) {
+                    keywords.add(iptcPiece.getValue());
+                }
+            }
+            log.info("Iptc Keywords are: " + keywords.toString());
         }
-
+        //XMP
+        if (xmpXmlString != null && ! xmpXmlString.isEmpty()) {
+            XMPMeta picXmp = XMPMetaFactory.parseFromString(xmpXmlString);
+            String currentKeyword = "";
+            if (picXmp.doesPropertyExist("http://purl.org/dc/elements/1.1/", "dc:subject")) {
+                int xmpArrayLength = picXmp.countArrayItems("http://purl.org/dc/elements/1.1/", "dc:subject");
+                //Xmp Arrays start at 1... Yeah... I know... Not my decision though.
+                for (int i=1; i <= xmpArrayLength; i++) {
+                    currentKeyword = picXmp.getArrayItem("http://purl.org/dc/elements/1.1/", "dc:subject", i).getValue();
+                    log.info("Add Xmp Keyword " + currentKeyword + " to Keyword Set.");
+                    keywords.addAll(Arrays.asList(splitAndTrim(currentKeyword, ",")));
+                }
+            }
+            log.info("Total Keywords are: " + keywords.toString());
+        }
         return keywords;
     }
 
@@ -68,7 +87,7 @@ public class Metadatareader {
                     break;
                 }
             }
-
+            //Comparison
             if (caption.isEmpty() || ! exifDescriptionField.getValue().toString().equals(iptcCaption.getValue())) {
                 log.warn("IPTC Caption and Exif Description not alike - IPTC: " +
                         (iptcCaption != null ? iptcCaption.getValue() : "null") +
@@ -80,7 +99,7 @@ public class Metadatareader {
             }
         }
         //XMP
-        if (xmpXmlString != null) {
+        if (xmpXmlString != null && ! xmpXmlString.isEmpty()) {
             XMPMeta picXmp = XMPMetaFactory.parseFromString(xmpXmlString);
             XMPProperty dcDescription = picXmp.getLocalizedText("http://purl.org/dc/elements/1.1/", "dc:description", "", "x-default");
             if (dcDescription != null) {
@@ -88,6 +107,7 @@ public class Metadatareader {
             } else {
                 log.warn("xmp.dc:description is null!");
             }
+            //Comparison
             if (dcDescription != null && !dcDescription.getValue().equals(caption)) {
                 log.warn("XMP Caption and Exif Description not alike - XMP: " +
                         (dcDescription != null ? dcDescription.getValue() : "null") +
@@ -106,5 +126,13 @@ public class Metadatareader {
         response.put("Keywords", getKeywords(picture).toArray());
         response.put("Caption", new String[]{getCaption(picture)});
         return response;
+    }
+
+    private static String[] splitAndTrim(String in, String regex) {
+        String[] splitString = in.split(regex);
+        for (String substring : splitString) {
+            substring.trim();
+        }
+        return splitString;
     }
 }

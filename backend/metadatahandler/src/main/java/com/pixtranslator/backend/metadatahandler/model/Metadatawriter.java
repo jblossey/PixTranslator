@@ -3,6 +3,7 @@ package com.pixtranslator.backend.metadatahandler.model;
 import com.adobe.internal.xmp.XMPException;
 import com.adobe.internal.xmp.XMPMeta;
 import com.adobe.internal.xmp.XMPMetaFactory;
+import com.adobe.internal.xmp.options.PropertyOptions;
 import com.adobe.internal.xmp.options.SerializeOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.imaging.ImageReadException;
@@ -26,18 +27,78 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+
+import static com.adobe.internal.xmp.XMPConst.NS_DC;
 
 @Slf4j
 public class Metadatawriter {
 
-    public static void rewriteKeywords (File picture, String[] keywords) {
-
+    public static void rewriteKeywords (File picture, String[] keywords)
+            throws IOException, ImageReadException, ImageWriteException, XMPException{
+        //XMP
+        final File tempXmp = File.createTempFile("temp_xmp", ".jpg");
+        try (FileOutputStream fos = new FileOutputStream(tempXmp);
+             OutputStream os = new BufferedOutputStream(fos)) {
+            final String xmpXmlString = Imaging.getXmpXml(picture);
+            String newXmpXmlString = "";
+            if (xmpXmlString != null && !xmpXmlString.isEmpty()) {
+                XMPMeta picXmp = XMPMetaFactory.parseFromString(xmpXmlString);
+                //delete old keywords array
+                picXmp.deleteProperty(NS_DC, "dc:subject");
+                //add each keyword one by one. Array recreation is done implicitly.
+                for (String keyword : keywords) {
+                    picXmp.appendArrayItem(NS_DC,
+                            "dc:subject",
+                            new PropertyOptions().setArray(true),
+                            keyword,
+                            null);
+                }
+                newXmpXmlString = XMPMetaFactory.serializeToString(picXmp, new SerializeOptions());
+            }
+            if (!newXmpXmlString.isEmpty()) {
+                new JpegXmpRewriter().updateXmpXml(picture, os, newXmpXmlString);
+            }
+        }
+        //IPTC
+        final File tempIptc = File.createTempFile("temp_iptc", ".jpg");
+        ImageMetadata metadata = Imaging.getMetadata(tempXmp);
+        JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
+        try (FileOutputStream fos = new FileOutputStream(tempIptc);
+             OutputStream os = new BufferedOutputStream(fos)) {
+            if (null != jpegMetadata) {
+                final JpegPhotoshopMetadata photoshopMetadata = jpegMetadata.getPhotoshop();
+                List<IptcRecord> iptcRecordList = photoshopMetadata.photoshopApp13Data.getRecords();
+                Collections.sort(iptcRecordList, IptcRecord.COMPARATOR);
+                //remove old keywords
+                Iterator<IptcRecord> iptcRecordIterator = iptcRecordList.iterator();
+                while (iptcRecordIterator.hasNext()) {
+                    IptcRecord currentRecord = iptcRecordIterator.next();
+                    if (currentRecord.iptcType.equals(IptcTypes.KEYWORDS)) iptcRecordIterator.remove();
+                }
+                //insert new Keywords
+                for (String keyword : keywords) {
+                    IptcRecord newRecordKeyword = new IptcRecord(IptcTypes.KEYWORDS, keyword);
+                    iptcRecordList.add(newRecordKeyword);
+                }
+                //sort entries to correct IPTC order
+                Collections.sort(iptcRecordList, IptcRecord.COMPARATOR);
+                //assemble in new App13 Block and write to file
+                PhotoshopApp13Data newPhotoshopApp13Data = new PhotoshopApp13Data(iptcRecordList,
+                        photoshopMetadata.photoshopApp13Data.getNonIptcBlocks());
+                new JpegIptcRewriter().writeIPTC(tempXmp, os, newPhotoshopApp13Data);
+            }
+        }
+        //replace old file and cleanup
+        Files.copy(tempIptc.toPath(), picture.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        tempXmp.delete();
+        tempIptc.delete();
     }
 
     public static void rewriteCaption (final File picture, String caption)
             throws IOException, ImageReadException, ImageWriteException, XMPException {
-        //TODO Bug: Exif not written to file. Examine why.
         //EXIF
         final File tempExif = File.createTempFile("temp_exif", ".jpg");
         ImageMetadata metadata = Imaging.getMetadata(picture);
@@ -45,10 +106,11 @@ public class Metadatawriter {
         try (FileOutputStream fos = new FileOutputStream(tempExif);
              OutputStream os = new BufferedOutputStream(fos)) {
             TiffOutputSet outputSet = null;
+            TiffImageMetadata exif = null;
             //copy existing data from immutable TiffImageMetadata
             //to mutable TiffOutputSet
             if (null != jpegMetadata) {
-                final TiffImageMetadata exif = jpegMetadata.getExif();
+                exif = jpegMetadata.getExif();
                 if (null != exif) {
                     outputSet = exif.getOutputSet();
                 }
@@ -57,11 +119,12 @@ public class Metadatawriter {
             if (null == outputSet) {
                 outputSet = new TiffOutputSet();
             }
-            final TiffOutputDirectory exifDirectory = outputSet.getOrCreateExifDirectory();
+            final TiffOutputDirectory rootDirectory = outputSet.getOrCreateRootDirectory();
             // make sure to remove old value if present (this method will
             // not fail if the tag does not exist).
-            exifDirectory.removeField(TiffTagConstants.TIFF_TAG_IMAGE_DESCRIPTION);
-            exifDirectory.add(TiffTagConstants.TIFF_TAG_IMAGE_DESCRIPTION, caption);
+            //List<TiffOutputDirectory> allDirectories = outputSet.getDirectories();
+            rootDirectory.removeField(TiffTagConstants.TIFF_TAG_IMAGE_DESCRIPTION);
+            rootDirectory.add(TiffTagConstants.TIFF_TAG_IMAGE_DESCRIPTION, caption);
             new ExifRewriter().updateExifMetadataLossy(picture, os, outputSet);
         }
         //XMP
@@ -72,7 +135,7 @@ public class Metadatawriter {
             String newXmpXmlString = "";
             if (xmpXmlString != null && !xmpXmlString.isEmpty()) {
                 XMPMeta picXmp = XMPMetaFactory.parseFromString(xmpXmlString);
-                picXmp.setLocalizedText("http://purl.org/dc/elements/1.1/",
+                picXmp.setLocalizedText(NS_DC,
                         "dc:description",
                         "",
                         "x-default",

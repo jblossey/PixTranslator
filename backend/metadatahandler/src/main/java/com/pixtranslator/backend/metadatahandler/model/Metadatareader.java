@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static com.adobe.internal.xmp.XMPConst.NS_DC;
+
 @Slf4j
 public class Metadatareader {
 
@@ -36,7 +38,7 @@ public class Metadatareader {
             Collections.sort(iptcData, IptcRecord.COMPARATOR);
             for (final IptcRecord iptcPiece : iptcData) {
                 if (iptcPiece.iptcType.equals(IptcTypes.KEYWORDS)) {
-                    keywords.add(iptcPiece.getValue());
+                    keywords.addAll(Arrays.asList(splitAndTrim(iptcPiece.getValue(), ",")));
                 }
             }
             log.info("Iptc Keywords are: " + keywords.toString());
@@ -45,12 +47,11 @@ public class Metadatareader {
         if (xmpXmlString != null && ! xmpXmlString.isEmpty()) {
             XMPMeta picXmp = XMPMetaFactory.parseFromString(xmpXmlString);
             String currentKeyword = "";
-            if (picXmp.doesPropertyExist("http://purl.org/dc/elements/1.1/", "dc:subject")) {
-                int xmpArrayLength = picXmp.countArrayItems("http://purl.org/dc/elements/1.1/", "dc:subject");
+            if (picXmp.doesPropertyExist(NS_DC, "dc:subject")) {
+                int xmpArrayLength = picXmp.countArrayItems(NS_DC, "dc:subject");
                 //Xmp Arrays start at 1... Yeah... I know... Not my decision though.
                 for (int i=1; i <= xmpArrayLength; i++) {
-                    currentKeyword = picXmp.getArrayItem("http://purl.org/dc/elements/1.1/", "dc:subject", i).getValue();
-                    log.info("Add Xmp Keyword " + currentKeyword + " to Keyword Set.");
+                    currentKeyword = picXmp.getArrayItem(NS_DC, "dc:subject", i).getValue();
                     keywords.addAll(Arrays.asList(splitAndTrim(currentKeyword, ",")));
                 }
             }
@@ -101,7 +102,7 @@ public class Metadatareader {
         //XMP
         if (xmpXmlString != null && ! xmpXmlString.isEmpty()) {
             XMPMeta picXmp = XMPMetaFactory.parseFromString(xmpXmlString);
-            XMPProperty dcDescription = picXmp.getLocalizedText("http://purl.org/dc/elements/1.1/", "dc:description", "", "x-default");
+            XMPProperty dcDescription = picXmp.getLocalizedText(NS_DC, "dc:description", "", "x-default");
             if (dcDescription != null) {
                 log.info("xmp.dc.description: " + dcDescription.getValue());
             } else {
@@ -121,17 +122,19 @@ public class Metadatareader {
         return caption;
     }
 
-    public static Map<String, Object[]> getKeywordsAndCaption(final File picture) throws ImageReadException, IOException, XMPException {
-        Map<String, Object[]> response = new HashMap<>();
-        response.put("Keywords", getKeywords(picture).toArray());
-        response.put("Caption", new String[]{getCaption(picture)});
+    public static Map<String, String[]> getKeywordsAndCaption(final File picture) throws ImageReadException, IOException, XMPException {
+        Map<String, String[]> response = new HashMap<>();
+        Set<String> keywords = getKeywords(picture);
+        response.put("Keywords", keywords.toArray(new String[keywords.size()]));
+        String[] captionArray = {getCaption(picture)};
+        response.put("Caption", captionArray);
         return response;
     }
 
     private static String[] splitAndTrim(String in, String regex) {
         String[] splitString = in.split(regex);
-        for (String substring : splitString) {
-            substring.trim();
+        for (int i = 0; i < splitString.length; i++) {
+            splitString[i] = splitString[i].trim();
         }
         return splitString;
     }

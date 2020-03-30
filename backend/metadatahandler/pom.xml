@@ -129,6 +129,53 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<executable>true</executable>
+					<mainClass>com.pixtranslator.backend.metadatahandler.MetadatahandlerApplication</mainClass>
+				</configuration>
+			</plugin>
+			<!-- EXE COMPILATION-->
+			<plugin>
+				<groupId>com.akathist.maven.plugins.launch4j</groupId>
+				<artifactId>launch4j-maven-plugin</artifactId>
+				<version>1.7.25</version>
+				<executions>
+					<execution>
+						<id>l4j-clui</id>
+						<phase>package</phase>
+						<goals>
+							<goal>launch4j</goal>
+						</goals>
+						<configuration>
+							<headerType>console</headerType>
+							<jar>${project.build.directory}/${artifactId}-${version}.jar</jar>
+							<outfile>${project.build.directory}/${artifactId}-${version}.exe</outfile>
+							<restartOnCrash>true</restartOnCrash>
+							<downloadUrl>http://java.com/download</downloadUrl>
+							<classPath>
+								<mainClass>org.springframework.boot.loader.JarLauncher</mainClass>
+							</classPath>
+							<icon>src/main/resources/icons/standard_backend.ico</icon>
+							<jre>
+								<path>openjdk-jre11-windows64</path>
+								<minVersion>11</minVersion>
+								<runtimeBits>64</runtimeBits>
+							</jre>
+							<versionInfo>
+								<fileVersion>1.0.0.0</fileVersion>
+								<txtFileVersion>${project.version}</txtFileVersion>
+								<fileDescription>${project.name}</fileDescription>
+								<copyright>2020 Jannis Blossey</copyright>
+								<productVersion>1.0.0.0</productVersion>
+								<txtProductVersion>1.0.0.0</txtProductVersion>
+								<productName>${project.name}</productName>
+								<companyName>Jannis Blossey</companyName>
+								<internalName>${artifactId}</internalName>
+								<originalFilename>${artifactId}-${version}.exe</originalFilename>
+							</versionInfo>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

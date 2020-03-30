@@ -1,6 +1,7 @@
 # TODO
 
 + Add Github Badges
++ Redesign GUI with Bootstrap
 + Make GUI:
   + DONE 1 Form to put in Deepl Key TODO (checkbox for save/not-save)
   + 1 Main Window

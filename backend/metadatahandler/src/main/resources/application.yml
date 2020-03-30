@@ -4,3 +4,12 @@ server:
 spring:
     application:
         name: Metadatahandler
+        
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    endpoint:
+        shutdown:
+            enabled: true

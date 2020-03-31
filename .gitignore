@@ -41,3 +41,5 @@ mwg_guidance.pdf
 metadatahandler-*.*
 
 yarn.lock
+
+.factorypath

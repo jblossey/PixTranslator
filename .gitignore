@@ -41,3 +41,5 @@ package-lock.json
 mwg_guidance.pdf
 
 metadatahandler-*.*
+
+yarn.lock

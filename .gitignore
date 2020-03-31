@@ -33,8 +33,6 @@ hs_err_pid*
 
 **/node_modules/
 
-**/.vscode
-
 package-lock.json
 **/photon-0.1.2-dist
 

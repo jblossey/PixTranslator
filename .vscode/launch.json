@@ -1,31 +1,36 @@
 {
     "version": "0.2.0",
     "configurations": [
-      {
-        "name": "Debug Main Process",
-        "type": "node",
-        "request": "launch",
-        "cwd": "${workspaceRoot}/frontend",
-        "runtimeExecutable": "${workspaceRoot}/frontend/node_modules/.bin/electron",
-        "windows": {
-          "runtimeExecutable": "${workspaceRoot}/frontend/node_modules/.bin/electron.cmd"
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Electron: Main",
+            "protocol": "inspector",
+            "runtimeExecutable": "${workspaceFolder}/frontend/node_modules/.bin/electron",
+            "runtimeArgs": [
+                "--remote-debugging-port=9223",
+                "./frontend/main.js"
+            ],
+            "windows": {
+                "runtimeExecutable": "${workspaceFolder}/frontend/node_modules/.bin/electron.cmd"
+            }
         },
-        "program": "${workspaceRoot}/frontend/main.js",
-        "protocol": "inspector"
-      },
-      {
-        "name": "Debug Renderer Process",
-        "type": "chrome",
-        "request": "launch",
-        "runtimeExecutable": "${workspaceRoot}/frontend/node_modules/.bin/electron",
-        "windows": {
-          "runtimeExecutable": "${workspaceRoot}/frontend/node_modules/.bin/electron.cmd"
-        },
-        "runtimeArgs": [
-          "${workspaceRoot}/frontend/main.js",
-          "--remote-debugging-port=9222"
-        ],
-        "webRoot": "${workspaceRoot}/frontend"
-      }
+        {
+            "name": "Electron: Renderer",
+            "type": "chrome",
+            "request": "attach",
+            "port": 9223,
+            "webRoot": "${workspaceFolder}/frontend",
+            "timeout": 30000
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Electron: All",
+            "configurations": [
+                "Electron: Main",
+                "Electron: Renderer"
+            ]
+        }
     ]
-  }
+}

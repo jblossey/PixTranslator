@@ -1,18 +1,13 @@
 # TODO
 
 + Add Github Badges
-+ Redesign GUI with Bootstrap
++ Redesign GUI with Bootstrap and React
 + Make GUI:
-  + DONE 1 Form to put in Deepl Key TODO (checkbox for save/not-save)
   + 1 Main Window
-  + DONE 1 Notice Window pre computation
   + 1 progress Window
   + 1 Notice Window post computation
 + Make JS Backend:
-  + DONE Save and Check Deepl Key
-  + DONE call remaining char-count from deepl
   + update character counters (later version)
-  + DONE Bind Routine-Start to Button
   + Active beibehalten wenn clicked, rechtsklick, auswahl, mehrfachauswahl und löschen
 + Make Java (Apache Commons Imaging) Backend:
   + Check whether database, deeplkey are present

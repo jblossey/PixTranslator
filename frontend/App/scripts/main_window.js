@@ -1,14 +1,16 @@
 const request = require('request');
 const jetpack = require('fs-jetpack');
 const remote = require('electron').remote;
+const storage = require('electron-json-storage');
 const main_process = remote.require('./main.js');
 const ipc = require('electron').ipcRenderer;
 
-let DEEPL_KEY = null;//'27c44ce2-ddbb-47ed-e8c6-1809382b6000';//TODO Assign null on publish
-let DEEPL_KEY_FILE = 'translation_access.dat';
-let CWD = null;//'C:/Users/janni/Desktop/iptc_translator/photon_GUI'//TODO assign null on publish, specify path on debugging
+//'27c44ce2-ddbb-47ed-e8c6-1809382b6000';//TODO delete
 
 let char_count, char_lim;
+
+//TODO handle clicks and multi-select
+//TODO enable user to delete items
 
 /**
  * Either fetches the Deepl-Key from const DEEPL_KEY_FILE
@@ -16,31 +18,32 @@ let char_count, char_lim;
  * provokes a form window to be shown for the user to input the key
  */
 function getDeeplKey(){
-    var read_data;
-    if ( (read_data = jetpack.read('./'+DEEPL_KEY_FILE, 'utf8')) ){
-        DEEPL_KEY = read_data;
-        fetchDeeplCharCount(DEEPL_KEY);
-    }
-    else{
-        main_process.retrieveDeeplKeyViaWindow();
-        //fetchDeeplCharCount call is done by ipc from retrieval_window
-    }
+    storage.get('DeeplKey', (error, data) => {
+        if (error) throw error;
+        if (data) {
+            fetchDeeplCharCount(data.deepl_key);
+        } else {
+            main_process.retrieveDeeplKeyViaWindow();
+        }
+    });
 }
 
 ipc.on('key_ready', (event, message) => {
-    DEEPL_KEY = message[0];
-    if (DEEPL_KEY){
-        jetpack.write('./'+DEEPL_KEY_FILE, DEEPL_KEY);
-        fetchDeeplCharCount(DEEPL_KEY);
+    deepl_key = message[0];
+    if (deepl_key){
+        if (message[1]) {
+            storage.set('DeeplKey', {deepl_key}, (error) => {
+                if (error) throw error;
+            });
+        }
+        fetchDeeplCharCount(deepl_key);
         const retrieval_window = remote.getGlobal('retrievalWindow');
         if (retrieval_window) {retrieval_window.webContents.send('key_ack');}
     }
 });
 
 function fetchDeeplCharCount(key){
-    //global variabel DEEPL_KEY can be set for convenience during dev
-    //in every user-case it should be null
-    if (key == null){
+    if (key === null){
         getDeeplKey();
         return;
     }
@@ -57,10 +60,12 @@ function fetchDeeplCharCount(key){
 
 /**
  * ! The ID of each list element consists of its lastModified-value concatenated with its size - both as strings!
- * TODO Check each Element if it is really a JPG -> Open New Window and Communicate to user if one or more elements are not JPEG
  * @param {event} event The Parameter passed from HTML-ondrop to the script.
  */
 // eslint-disable-next-line no-unused-vars
+
+//TODO check each element if jpeg
+//TODO fetch keywords and caption for each element and write to fields
 function handleDrop(event){
     function createAndAssignInnerHtml(el_type, inner){
         let el = document.createElement(el_type);
@@ -113,8 +118,7 @@ function showPreExecutionNotice(){
 }
 
 window.onload = () => {
-    if (!CWD) CWD = process.cwd();
-    fetchDeeplCharCount(DEEPL_KEY);
+    fetchDeeplCharCount(null);
 }
 
 

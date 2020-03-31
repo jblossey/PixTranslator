@@ -1,35 +1,47 @@
 {
-  "name": "iptc_translator",
-  "version": "0.0.1",
-  "description": "A simple GUI for accessing IPTC Tags and Captions and translating them via the Deepl API",
+  "name": "Pix_Translator",
+  "version": "0.1.0",
+  "description": "Translate your JPEGs Keywords and Caption via Deepl.",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/JBlossey/iptc_translator.git"
+    "url": "git+https://github.com/jblossey/PixTranslator.git"
   },
+  "private": true,
   "keywords": [
     "iptc",
+    "exif",
+    "xmp",
     "tags",
     "captions",
     "jpg",
     "metadata",
-    "deepl"
+    "deepl",
+    "translation",
+    "keywords",
+    "photography"
   ],
-  "author": "Jannis Blossey",
+  "author": "Jannis Blossey <jannis@blossey.eu>",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/JBlossey/iptc_translator/issues"
+    "url": "https://github.com/jblossey/PixTranslator/issues"
   },
-  "homepage": "https://gitlab.com/JBlossey/iptc_translator#readme",
+  "homepage": "https://github.com/jblossey/PixTranslator/blob/master/README.md",
   "dependencies": {
-    "electron": "^6.0.10",
-    "fs-jetpack": "^2.2.2",
-    "request": "^2.88.0"
+    "electron": "^8.2.0",
+    "electron-json-storage": "^4.1.8",
+    "electron-positioner": "^4.1.0",
+    "electron-unhandled": "^3.0.2",
+    "fs-jetpack": "^2.2.3",
+    "minimal-request-promise": "^1.5.0",
+    "request": "^2.88.2",
+    "unhandled": "^0.1.1",
+    "yarn": "^1.22.4"
   },
   "devDependencies": {
-    "eslint": "^6.4.0"
+    "eslint": "^6.8.0"
   }
 }

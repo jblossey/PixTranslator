@@ -1,4 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+const requestPromise = require('minimal-request-promise');
+const unhandled = require('electron-unhandled');
+const storage = require('electron-json-storage');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -7,7 +10,27 @@ global.retrievalWindow = null;
 global.preExecutionNotice = null;
 let DEEPL_KEY = null;
 
-function createMainWindow () {
+//enable user-friendly handling of unhandled errors
+unhandled();
+
+//spawn backend server
+platform = process.platform;
+
+// Check operating system
+if (platform === 'win32') {
+   serverProcess = require('child_process')
+       .spawn('cmd.exe', ['/c', 'metadatahandler-0.1.0.exe'],
+           {
+               cwd: app.getAppPath() + '/bin'
+           });
+} else {
+   serverProcess = require('child_process')
+       .spawn(app.getAppPath() + '/bin/metadatahandler-0.1.0.jar');
+}
+
+let appUrl = 'http://localhost:4711';
+
+const startGui = function createMainWindow () {
 	// Create the browser window.
 	global.main_window = new BrowserWindow({
 		width: 1240,
@@ -34,11 +57,13 @@ function createMainWindow () {
 		// Dereference the window object, usually you would store windows
 		// in an array if your app supports multi windows, this is the time
 		// when you should delete the corresponding element.
-		global.main_window = null
+		global.main_window = null;
+		global.preExecutionNotice = null;
+		global.retrievalWindow = null;
 	})
 }
 
-exports.retrieveDeeplKeyViaWindow = () => {
+exports.retrieveDeeplKeyViaWindow = function startRetrieveWindows () {
 	global.retrievalWindow = new BrowserWindow({
 		parent: global.main_window,
 		modal: true,
@@ -91,19 +116,36 @@ exports.showPreExecutionNotice = () => {
 	});
 }
 
-exports.startTranslationRoutine = () => {}
+exports.startTranslationRoutine = () => {
+
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', () => {
-	createMainWindow();
+app.on('ready', () => { 
+	requestPromise.get(appUrl+'/actuator/health').then(function (response) {
+		const answer = JSON.parse(response.body);
+		if (answer.status === "UP") {
+			console.log('Server started!');
+			startGui();
+		}
+	}, function (response) {
+		console.log('Waiting for the server start...');
+		setTimeout(function () {
+			startGui();
+		}, 200);
+	});
 })
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
 	// On macOS it is common for applications and their menu bar
 	// to stay active until the user quits explicitly with Cmd + Q
+	requestPromise.post(appUrl+'/actuator/shutdown').then(function (response) {
+		console.log('Stop signal sent to metadatahandler.');
+		serverProcess = null;
+	});
 	if (process.platform !== 'darwin') {
 		app.quit()
 	}
@@ -113,7 +155,7 @@ app.on('activate', () => {
 	// On macOS it's common to re-create a window in the app when the
 	// dock icon is clicked and there are no other windows open.
 	if (global.main_window === null) {
-		createMainWindow()
+		startGui()
 	}
 })
 // In this file you can include the rest of your app's specific main process

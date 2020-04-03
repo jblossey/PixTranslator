@@ -128,19 +128,7 @@ exports.startTranslationRoutine = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  requestPromise.get(metadatahandlerUrl + '/actuator/health').then((response) => {
-    const answer = JSON.parse(response.body);
-    if (answer.status === 'UP') {
-      console.log('Server started!');
-      startGui();
-    }
-  // eslint-disable-next-line no-unused-vars
-  }, (response) => {
-    console.log('Waiting for the server start...');
-    setTimeout(() => {
-      startGui();
-    }, 200);
-  });
+  startGui();
 });
 
 // Quit when all windows are closed.

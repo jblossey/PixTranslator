@@ -30,3 +30,15 @@ img{
     vertical-align: middle;
     text-align: center;
 }
+
+table{
+    table-layout: fixed;
+}
+
+td{
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+

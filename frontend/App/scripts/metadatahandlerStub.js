@@ -3,17 +3,21 @@
 /* eslint-disable prefer-template */
 const needle = require('needle');
 
-exports.requestKeywordsAndCaption = (picPath, callback) => {
+exports.requestKeywordsAndCaption = (picPath) => new Promise((fulfill, reject) => {
   let keywords;
   let caption;
-  needle.get('http://localhost:4711/getKeywordsAndCaption?path=' + picPath, (error, response) => {
-    if (!error && response.statusCode === 200) {
-      keywords = response.body.Keywords;
-      caption = response.body.Caption;
+  needle('get', 'http://localhost:4711/getKeywordsAndCaption?path=' + picPath).then((response) => {
+    try {
+      if (response.statusCode === 200) {
+        keywords = response.body.Keywords;
+        caption = response.body.Caption;
+      }
+      fulfill({ keywords, caption });
+    } catch (error) {
+      reject(error);
     }
-    callback({ keywords, caption });
   });
-};
+});
 
 exports.countKeywordChars = (keywords) => {
   let counter = 0;

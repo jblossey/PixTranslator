@@ -1,10 +1,10 @@
+/* eslint-disable no-loop-func */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable prefer-template */
 const { remote, ipcRenderer } = require('electron');
 const needle = require('needle');
 const storage = require('electron-json-storage');
 const $ = require('jquery');
-const Promise = require('promise');
 // eslint-disable-next-line import/no-unresolved
 const metadatahandlerStub = require('./scripts/metadatahandlerStub');
 
@@ -84,19 +84,18 @@ function handleDrop(event) {
   }
 
   event.preventDefault();
+  // do nothing if metadatahandler is not ready
+  if ($('#metadatahandler_status').css('color') !== 'rgb(0, 255, 0)') return;
   // hide call, show file-list
   $('#call_for_drop').css('display', 'none');
   $('#file_list').css('display', 'table');
   // add dropped items to list
-  const tableBody = $('#tableBody');
+  const tableBody = $('tbody');
   const { files } = event.dataTransfer;
   let children = [];
   for (const file of files) {
     // TODO: make sure keysAndCaps is not used before it is assigned.
-    // eslint-disable-next-line no-loop-func
-    const reqKeyNCap = Promise.denodeify(metadatahandlerStub.requestKeywordsAndCaption);
-
-    metadatahandlerStub.requestKeywordsAndCaption(file.path, (keysAndCaps) => {
+    metadatahandlerStub.requestKeywordsAndCaption(file.path).then((keysAndCaps) => {
       console.log(keysAndCaps);
       // eslint-disable-next-line no-undef
       const newEntry = document.createElement('tr');
@@ -133,7 +132,26 @@ function showPreExecutionNotice() {
   mainProcess.showPreExecutionNotice();
 }
 
+const checkMetadatahandlerHealth = () => {
+  needle.get('http://localhost:4711/actuator/health', (err, response) => {
+    if (err || response.statusCode !== 200) {
+      $('#metadatahandler_status').css('color', 'red');
+    } else {
+      $('#metadatahandler_status').css('color', 'lime');
+    }
+  });
+};
+
+/**
+ * Bundled place for all regularly occuring checks, routines, etc.
+ */
+const intervalFunctions = () => {
+  setInterval(() => { checkMetadatahandlerHealth(); }, 10000);
+};
+
 // eslint-disable-next-line no-undef
 window.onload = () => {
   fetchDeeplCharCount(null);
+  checkMetadatahandlerHealth();
+  setTimeout(() => { intervalFunctions(); }, 5000);
 };

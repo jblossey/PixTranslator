@@ -1,6 +1,6 @@
-package com.pixtranslator.backend.metadatahandler;
+package com.pixtranslator.backend.databasehandler;
 
-import com.pixtranslator.backend.metadatahandler.controller.MetadatahandlerController;
+import com.pixtranslator.backend.databasehandler.controller.MetadatahandlerController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

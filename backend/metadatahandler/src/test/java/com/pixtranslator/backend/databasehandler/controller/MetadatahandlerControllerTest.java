@@ -1,4 +1,4 @@
-package com.pixtranslator.backend.metadatahandler.controller;
+package com.pixtranslator.backend.databasehandler.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;

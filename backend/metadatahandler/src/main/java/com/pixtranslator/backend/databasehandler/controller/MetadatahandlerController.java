@@ -1,4 +1,4 @@
-package com.pixtranslator.backend.metadatahandler.controller;
+package com.pixtranslator.backend.databasehandler.controller;
 
 import com.adobe.internal.xmp.XMPException;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.pixtranslator.backend.metadatahandler.model.Metadatareader.*;
-import static com.pixtranslator.backend.metadatahandler.model.Metadatawriter.*;
+import static com.pixtranslator.backend.databasehandler.model.Metadatareader.*;
+import static com.pixtranslator.backend.databasehandler.model.Metadatawriter.*;
 
 @RestController
 @Slf4j

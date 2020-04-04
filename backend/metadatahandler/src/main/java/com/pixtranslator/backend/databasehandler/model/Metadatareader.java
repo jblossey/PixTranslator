@@ -1,4 +1,4 @@
-package com.pixtranslator.backend.metadatahandler.model;
+package com.pixtranslator.backend.databasehandler.model;
 
 import com.adobe.internal.xmp.XMPException;
 import com.adobe.internal.xmp.XMPMeta;

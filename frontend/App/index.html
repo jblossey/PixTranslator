@@ -39,12 +39,16 @@
         <div id="picture_character_count" class="pull-left footer_text">Characters in Pictures: N/A</div>
         <div id="deepl_character_count" class="pull-left footer_text">Characters left on Deepl: N/A</div>
         <div class="pull-left footer_text">
-          Metadatahandler Status: <div id="metadatahandler_status" class="icon icon-record" style="color:red; display:inline-block"></div>
+          Metadatahandler Status: <div id="metadatahandler_status" class="icon icon-record" style="color:orange; display:inline-block"></div>
         </div>
         <div class="toolbar-actions">
           <button class="btn btn-large btn-default pull-right" onclick="showPreExecutionNotice()">
             <span class="icon icon-upload-cloud icon-text"></span>
             Translate Metadata
+          </button>
+          <button class="btn btn-large btn-default pull-right" onclick="removeAllItemsFromTable()">
+            <span class="icon icon-cancel-circled icon-text"></span>
+            Clear List
           </button>
         </div>
       </footer>

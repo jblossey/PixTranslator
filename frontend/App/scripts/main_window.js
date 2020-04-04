@@ -16,7 +16,6 @@ let charCount;
 let charLim;
 
 // TODO handle clicks and multi-select
-// TODO enable user to delete items
 
 function fetchDeeplCharCount(key) {
   if (key === null) {
@@ -72,8 +71,6 @@ ipcRenderer.on('key_ready', (event, message) => {
 // eslint-disable-next-line no-unused-vars
 
 // TODO check each element if jpeg
-// TODO fetch keywords and caption for each element and write to fields
-// TODO rewrite function in proper jQuery
 // eslint-disable-next-line no-unused-vars
 function handleDrop(event) {
   function createAndAssignInnerHtml(elType, inner) {
@@ -94,9 +91,7 @@ function handleDrop(event) {
   const { files } = event.dataTransfer;
   let children = [];
   for (const file of files) {
-    // TODO: make sure keysAndCaps is not used before it is assigned.
     metadatahandlerStub.requestKeywordsAndCaption(file.path).then((keysAndCaps) => {
-      console.log(keysAndCaps);
       // eslint-disable-next-line no-undef
       const newEntry = document.createElement('tr');
       newEntry.id = (file.lastModified.toString() + file.size.toString());
@@ -125,7 +120,11 @@ function allowDrop(event) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function removeFromPictureList() {}
+function removeAllItemsFromTable() {
+  $('#table_body').empty();
+  $('#file_list').css('display', 'none');
+  $('#call_for_drop').css('display', 'initial');
+}
 
 // eslint-disable-next-line no-unused-vars
 function showPreExecutionNotice() {

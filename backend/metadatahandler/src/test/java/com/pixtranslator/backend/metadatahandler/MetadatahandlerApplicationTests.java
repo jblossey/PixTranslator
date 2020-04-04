@@ -10,12 +10,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class MetadatahandlerApplicationTests {
 
-	@Autowired
-	private MetadatahandlerController controller;
+  @Autowired
+  private MetadatahandlerController controller;
 
-	@Test
-	void contextLoads () {
-		assertThat(controller).isNotNull();
-	}
+  @Test
+  void contextLoads() {
+    assertThat(controller).isNotNull();
+  }
 
 }

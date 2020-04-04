@@ -7,9 +7,9 @@
   + 1 Main Window
   + 1 progress Window
   + 1 Notice Window post computation
+  + Manually change Keywords and Caps on the fly
 + Make JS Backend:
   + update character counters (later version)
-  + Active beibehalten wenn clicked, rechtsklick, auswahl, mehrfachauswahl und löschen
 + Make Java (Apache Commons Imaging) Backend:
   + Check whether database, deeplkey are present
   + character count service

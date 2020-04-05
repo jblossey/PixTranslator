@@ -17,18 +17,30 @@ unhandled();
 // TODO Add electron "about this app"-window -> see https://github.com/rhysd/electron-about-window
 // TODO Replace ipc communication with electron router -> see https://github.com/m0n0l0c0/electron-router
 
-// Check operating system
-const platform = process;
-if (platform === 'win32') {
-  serverProcess.spawn('cmd.exe', ['/c', 'metadatahandler-0.1.0.exe'],
-    {
-      cwd: app.getAppPath() + '/bin',
-    });
-} else {
-  serverProcess.spawn(app.getAppPath() + '/bin/metadatahandler-0.1.0.jar');
-}
+const backendUrls = {
+  metadatahandler: 'http://localhost:4711',
+  databasehandler: 'http://localhost:4712',
+};
 
-const metadatahandlerUrl = 'http://localhost:4711';
+const spawnBackendServices = () => {
+  const backendBinaries = [
+    'metadatahandler-0.1.0',
+    'databasehandler-0.1.0',
+  ];
+
+  // Check operating system
+  const platform = process;
+  backendBinaries.forEach((binary) => {
+    if (platform === 'win32') {
+      serverProcess.spawn('cmd.exe', ['/c', binary + '.exe'],
+        {
+          cwd: app.getAppPath() + '/bin',
+        });
+    } else {
+      serverProcess.spawn(app.getAppPath() + '/bin/' + binary + '.jar');
+    }
+  });
+};
 
 const startGui = function createMainWindow() {
   // Create the browser window.
@@ -116,30 +128,54 @@ exports.showPreExecutionNotice = () => {
   global.preExecutionNotice.removeMenu();
   global.preExecutionNotice.loadFile('./App/preExecutionNotice.html');
   global.preExecutionNotice.on('closed', () => {
-    global.retrievalWindow = null;
+    global.preExecutionNotice = null;
   });
 };
 
-exports.startTranslationRoutine = () => {
-
+exports.showProgressWindow = () => {
+  global.progressWindow = new BrowserWindow({
+    parent: global.mainWindow,
+    modal: true,
+    width: 600,
+    height: 350,
+    center: true,
+    webPreferences: {
+      nodeIntegration: true,
+    },
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    titleBarStyle: 'hidden',
+  });
+  // global.preExecutionNotice.webContents.openDevTools();
+  global.progressWindow.removeMenu();
+  global.progressWindow.loadFile('./App/progressWindow.html');
+  global.progressWindow.on('closed', () => {
+    global.progressWindow = null;
+  });
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+  spawnBackendServices();
   startGui();
 });
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
-// On macOS it is common for applications and their menu bar
-// to stay active until the user quits explicitly with Cmd + Q
-  // eslint-disable-next-line no-unused-vars
-  requestPromise.post(metadatahandlerUrl + '/actuator/shutdown').then((response) => {
-    console.log('Stop signal sent to metadatahandler.');
-    serverProcess = null;
+  // Send shutdown request to all backend services
+  Object.keys(backendUrls).forEach(async (key) => {
+    if (key === 'databasehandler') {
+      await requestPromise.get(backendUrls[key] + '/dumpDictionary');
+    }
+    await requestPromise.post(backendUrls[key] + '/actuator/shutdown');
   });
+  serverProcess = null;
+  // On macOS it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
     app.quit();
   }

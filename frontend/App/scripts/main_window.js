@@ -1,3 +1,5 @@
+/* eslint-disable no-cond-assign */
+/* eslint-disable no-plusplus */
 /* eslint-disable no-loop-func */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable prefer-template */
@@ -7,6 +9,9 @@ const storage = require('electron-json-storage');
 const $ = require('jquery');
 // eslint-disable-next-line import/no-unresolved
 const metadatahandlerStub = require('./scripts/metadatahandlerStub');
+// eslint-disable-next-line import/no-unresolved
+const translator = require('./scripts/translationRoutine');
+
 
 const mainProcess = remote.require('./main.js');
 
@@ -90,6 +95,7 @@ function handleDrop(event) {
   const tableBody = $('tbody');
   const { files } = event.dataTransfer;
   let children = [];
+  let totalCharCount = 0;
   for (const file of files) {
     metadatahandlerStub.requestKeywordsAndCaption(file.path).then((keysAndCaps) => {
       // eslint-disable-next-line no-undef
@@ -98,11 +104,13 @@ function handleDrop(event) {
       // eslint-disable-next-line no-undef
       const imageElem = document.createElement('img');
       imageElem.src = file.path;
+      const currentCharCount = metadatahandlerStub.countKeysAndCapChars(keysAndCaps);
+      totalCharCount += currentCharCount;
       children = [
         createAndAssignInnerHtml('td', file.name),
         createAndAssignInnerHtml('td', keysAndCaps.caption),
         createAndAssignInnerHtml('td', keysAndCaps.keywords),
-        createAndAssignInnerHtml('td', metadatahandlerStub.countKeysAndCapChars(keysAndCaps)),
+        createAndAssignInnerHtml('td', currentCharCount),
         // eslint-disable-next-line no-undef
         document.createElement('td').appendChild(imageElem),
       ];
@@ -110,6 +118,7 @@ function handleDrop(event) {
         newEntry.appendChild(child);
       }
       tableBody.append(newEntry);
+      $('#picture_character_count').text('Characters in Pictures: ' + totalCharCount);
     });
   }
 }
@@ -131,6 +140,17 @@ function showPreExecutionNotice() {
   mainProcess.showPreExecutionNotice();
 }
 
+// eslint-disable-next-line no-unused-vars
+ipcRenderer.on('startTranslation', (event) => {
+  mainProcess.showProgressWindow();
+  const progressWindow = remote.getGlobal('progressWindow');
+  // eslint-disable-next-line no-undef
+  const totalPicNumber = document.getElementById('table_body').rows.length;
+  if (progressWindow) progressWindow.webContents.send('initProgressbar', [totalPicNumber]);
+  const PicCollectionArray = translator.collectKeysAndCaps();
+  // TODO
+});
+
 const checkMetadatahandlerHealth = () => {
   needle.get('http://localhost:4711/actuator/health', (err, response) => {
     if (err || response.statusCode !== 200) {
@@ -141,16 +161,33 @@ const checkMetadatahandlerHealth = () => {
   });
 };
 
+const dumpDatabase = () => {
+  needle.get('http://localhost:4712/dumpDictionary', (err, response) => {
+    if (err || response.statusCode !== 200) {
+      $('#database_status').css('color', 'red');
+    } else {
+      $('#database_status').css('color', 'lime');
+      $('#lastSave').text('Last Save: ' + new Date().toLocaleTimeString('en-GB'));
+    }
+  });
+};
+
 /**
  * Bundled place for all regularly occuring checks, routines, etc.
  */
 const intervalFunctions = () => {
   setInterval(() => { checkMetadatahandlerHealth(); }, 10000);
+  setInterval(() => { dumpDatabase(); }, 30000);
+};
+
+const initIntervals = () => {
+  checkMetadatahandlerHealth();
+  dumpDatabase();
+  intervalFunctions();
 };
 
 // eslint-disable-next-line no-undef
 window.onload = () => {
   fetchDeeplCharCount(null);
-  checkMetadatahandlerHealth();
-  setTimeout(() => { intervalFunctions(); }, 5000);
+  setTimeout(() => { initIntervals(); }, 5000);
 };

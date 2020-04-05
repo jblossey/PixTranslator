@@ -1,12 +1,13 @@
 /* eslint-disable no-unused-vars */
 const { remote } = require('electron');
 
-const mainProcess = remote.require('./main.js');
-
 function executeOk() {
-  mainProcess.startTranslationRoutine();
-  const selfWindow = remote.getCurrentWindow();
-  selfWindow.close();
+  const mainWindow = remote.getGlobal('mainWindow');
+  if (mainWindow) {
+    mainWindow.webContents.send('startTranslation');
+    const selfWindow = remote.getCurrentWindow();
+    selfWindow.close();
+  }
 }
 
 function executeCancel() {

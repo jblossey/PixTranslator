@@ -1,11 +1,14 @@
 module.exports = {
-    "env": {
+    env: {
         "commonjs": true,
         "es6": true,
         "node": true,
         "jquery": true
     },
-    "extends": [
+    extends: [
       "airbnb-base"
+    ],
+    plugins: [
+      "@babel/plugin-proposal-private-methods"
     ]
 };

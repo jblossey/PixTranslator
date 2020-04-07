@@ -15,7 +15,4 @@ public interface TranslateddictionaryRepository extends CrudRepository<Translate
   Translateddictionary findByGerman(@Param("german") String german);
 
   List<Translateddictionary> findAllByGermanInIgnoreCase(@Param("german") Collection<String> german);
-
-  @Query(value = "SCRIPT TO :file", nativeQuery = true)
-  List<String> saveDict(@Param("file") String file);
 }

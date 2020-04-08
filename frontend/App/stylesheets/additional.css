@@ -42,3 +42,10 @@ td{
     text-overflow: clip;
 }
 
+#progressBar{
+    position: fixed;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    top: 30%;
+}

@@ -136,7 +136,7 @@ exports.showProgressWindow = () => {
     parent: global.mainWindow,
     modal: true,
     width: 600,
-    height: 350,
+    height: 150,
     center: true,
     webPreferences: {
       nodeIntegration: true,

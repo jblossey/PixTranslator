@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-/* eslint-disable prefer-template */
 const { app, BrowserWindow } = require('electron');
 const requestPromise = require('minimal-request-promise');
 const unhandled = require('electron-unhandled');
@@ -32,12 +31,12 @@ const spawnBackendServices = () => {
   const platform = process;
   backendBinaries.forEach((binary) => {
     if (platform === 'win32') {
-      serverProcess.spawn('cmd.exe', ['/c', binary + '.exe'],
+      serverProcess.spawn('cmd.exe', ['/c', `${binary}.exe`],
         {
-          cwd: app.getAppPath() + '/bin',
+          cwd: `${app.getAppPath()}/bin`,
         });
     } else {
-      serverProcess.spawn(app.getAppPath() + '/bin/' + binary + '.jar');
+      serverProcess.spawn(`${app.getAppPath()}/bin/${binary}.jar`);
     }
   });
 };
@@ -168,10 +167,7 @@ app.on('ready', () => {
 app.on('window-all-closed', () => {
   // Send shutdown request to all backend services
   Object.keys(backendUrls).forEach(async (key) => {
-    if (key === 'databasehandler') {
-      await requestPromise.get(backendUrls[key] + '/dumpDictionary');
-    }
-    await requestPromise.post(backendUrls[key] + '/actuator/shutdown');
+    requestPromise.post(`${backendUrls[key]}/actuator/shutdown`);
   });
   serverProcess = null;
   // On macOS it is common for applications and their menu bar

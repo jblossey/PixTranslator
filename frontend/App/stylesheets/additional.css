@@ -3,10 +3,10 @@ img{
     padding: .1em;
     margin: .1em;
     border: 1px solid #ddd;
-    width: auto;
-    max-height: 5em;
-    vertical-align: middle;
+    width: 100%;
 }
+
+td img {vertical-align: bottom;}
 
 .footer_text{
     height: 100%;

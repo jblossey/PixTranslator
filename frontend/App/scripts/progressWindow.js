@@ -1,6 +1,5 @@
 /* eslint-disable no-plusplus */
 // eslint-disable-next-line no-unused-vars
-const siimple = require('siimple');
 const { ipcRenderer } = require('electron');
 const $ = require('jquery');
 

@@ -1,4 +1,3 @@
-/* eslint-disable prefer-template */
 /* eslint-disable no-plusplus */
 // eslint-disable-next-line no-unused-vars
 const siimple = require('siimple');
@@ -8,7 +7,7 @@ const $ = require('jquery');
 let currentProgress = 0;
 let totalProgress;
 
-const assignTotalProgress = (totalPicNumber) => { totalProgress = totalPicNumber * 5; };
+const assignTotalProgress = (totalPicNumber) => { totalProgress = totalPicNumber * 4; };
 
 ipcRenderer.on('initProgressbar', (event, message) => {
   assignTotalProgress(message[0]);
@@ -18,7 +17,11 @@ ipcRenderer.on('initProgressbar', (event, message) => {
 ipcRenderer.on('progressStep', () => {
   currentProgress++;
   const valueField = $('#valueField');
-  const progressBarValue = Math.ceil(currentProgress / totalProgress);
-  valueField.css('width', progressBarValue + '%');
-  valueField.text(progressBarValue + '% Completed');
+  const progressInPercent = currentProgress / totalProgress;
+  const progressBarValue = progressInPercent < 0.5
+    ? Math.ceil(progressInPercent)
+    // eslint-disable-next-line no-bitwise
+    : ~~progressInPercent;
+  valueField.css('width', `${progressBarValue}%`);
+  valueField.text(`${progressBarValue}% Completed`);
 });

@@ -6,7 +6,7 @@ const Promise = require('promise');
 exports.requestKeywordsAndCaption = (picPath) => new Promise((fulfill, reject) => {
   let keywords;
   let caption;
-  needle('get', `http://localhost:4711/getKeywordsAndCaption?path=${picPath}`).then((response) => {
+  needle('get', encodeURI(`http://localhost:4711/getKeywordsAndCaption?path=${picPath}`)).then((response) => {
     try {
       if (response.statusCode === 200) {
         keywords = response.body.Keywords;

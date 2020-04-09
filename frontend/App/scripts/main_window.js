@@ -45,7 +45,7 @@ function fetchDeeplCharCount(key) {
  * or
  * provokes a form window to be shown for the user to input the key
  */
-function getDeeplKey() {
+async function getDeeplKey() {
   storage.get('deeplKey', (error, data) => {
     if (error) throw error;
     if (data.deeplKey) {
@@ -151,14 +151,26 @@ function showPreExecutionNotice() {
 }
 
 // eslint-disable-next-line no-unused-vars
-ipcRenderer.on('startTranslation', async (event) => {
-  mainProcess.showProgressWindow();
-  const progressWindow = remote.getGlobal('progressWindow');
-  // eslint-disable-next-line no-undef
-  const totalPicNumber = document.getElementById('table_body').rows.length;
-  if (progressWindow) progressWindow.webContents.send('initProgressbar', [totalPicNumber]);
-  picCollectionArray = await translator.getDbTranslationsForMany(picCollectionArray);
-  // TODO
+ipcRenderer.on('startTranslation', (event) => {
+  storage.get('deeplKey', async (error, data) => {
+    if (error) throw error;
+    if (data.deeplKey) {
+      const { deeplKey } = data;
+      mainProcess.showProgressWindow();
+      const progressWindow = remote.getGlobal('progressWindow');
+      // eslint-disable-next-line no-undef
+      const totalPicNumber = document.getElementById('table_body').rows.length;
+      if (progressWindow) progressWindow.webContents.send('initProgressbar', [totalPicNumber]);
+      picCollectionArray = await translator.getDbTranslationsForMany(picCollectionArray);
+      picCollectionArray = await translator.getDeeplTranslationsForMany(
+        picCollectionArray,
+        deeplKey,
+      );
+      
+    } else {
+      mainProcess.retrieveDeeplKeyViaWindow();
+    }
+  });
 });
 
 const checkServiceHealth = (service, port) => {

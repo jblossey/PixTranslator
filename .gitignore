@@ -43,3 +43,5 @@ yarn.lock
 .factorypath
 
 /frontend/bin/**
+
+*.db

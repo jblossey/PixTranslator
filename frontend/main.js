@@ -155,6 +155,14 @@ exports.showProgressWindow = () => {
   });
 };
 
+exports.initProgressbar = (totalPicCount) => {
+  global.progressWindow.webContents.send('initProgressbar', [totalPicCount]);
+};
+
+exports.progressStep = () => {
+  global.progressWindow.webContents.send('progressStep');
+};
+
 exports.showCompletedWindow = () => {
   global.progressWindow.close();
   global.completedWindow = new BrowserWindow({

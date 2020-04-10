@@ -9,6 +9,10 @@ unhandled();
 let currentProgress = 0;
 let totalProgress;
 
+/**
+ * totalProgress is 4 times totalPicnumber (dbtranslate, deepltranslate, writing, rereading)
+ * @param {*} totalPicNumber 
+ */
 const assignTotalProgress = (totalPicNumber) => { totalProgress = totalPicNumber * 4; };
 
 ipcRenderer.on('initProgressbar', (event, message) => {

@@ -164,6 +164,7 @@ const reReadKeywordsAndCaptions = (reReadArray) => {
         currentPicRow.cells[3].innerHTML = metadatahandlerStub.countKeywordChars(
           metadatahandlerStub.countKeysAndCapChars(keysAndCaps),
         );
+        mainProcess.progressStep();
       },
     );
   }
@@ -176,11 +177,10 @@ ipcRenderer.on('startTranslation', (event) => {
     if (data.deeplKey) {
       const { deeplKey } = data;
       mainProcess.showProgressWindow();
-      const progressWindow = remote.getGlobal('progressWindow');
       // eslint-disable-next-line no-undef
       const totalPicNumber = document.getElementById('table_body').rows.length;
-      // +++ TRANSLATION +++
-      if (progressWindow) progressWindow.webContents.send('initProgressbar', [totalPicNumber]);
+      // +++ TRANSLATION +++const mainProcess = remote.require('./main.js');
+      mainProcess.initProgressbar(totalPicNumber);
       picCollectionArray = await translator.getDbTranslationsForMany(picCollectionArray);
       picCollectionArray = await translator.getDeeplTranslationsForMany(
         picCollectionArray,

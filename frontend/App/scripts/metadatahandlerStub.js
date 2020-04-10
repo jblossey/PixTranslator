@@ -8,6 +8,8 @@ const assert = require('assert');
 // eslint-disable-next-line import/no-unresolved
 const { translationMappingUnion } = require('./setMethods');
 
+const mainProcess = remote.require('./main.js');
+
 exports.requestKeywordsAndCaption = (picPath) => new Promise((fulfill, reject) => {
   let keywords;
   let caption;
@@ -58,10 +60,9 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
 });
 
 exports.writeKeywordsAndCaptionForMany = async (picCollectionArray) => {
-  const progressWindow = remote.getGlobal('progressWindow');
   await Promise.all(picCollectionArray.map(async (currentPicCollection) => {
     await this.writeKeywordsAndCaptionForOne(currentPicCollection);
-    if (progressWindow) progressWindow.webContents.send('progressStep');
+    mainProcess.progressStep();
   }));
 };
 

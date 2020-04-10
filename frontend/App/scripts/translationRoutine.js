@@ -8,6 +8,8 @@ const needle = require('needle');
 // eslint-disable-next-line import/no-unresolved
 const { setDifference } = require('./setMethods');
 
+const mainProcess = remote.require('./main.js');
+
 class PicCollection {
   constructor(picPath, keywords, caption) {
     this._picPath = picPath;
@@ -92,10 +94,9 @@ const getDbTranslationsForOne = (picCollection) => new Promise((fulfill, reject)
 });
 
 const getDbTranslationsForMany = async (picCollectionArray) => {
-  const progressWindow = remote.getGlobal('progressWindow');
   await Promise.all(picCollectionArray.map(async (currentPicCollection) => {
     await getDbTranslationsForOne(currentPicCollection);
-    if (progressWindow) progressWindow.webContents.send('progressStep');
+    mainProcess.progressStep();
   }));
   return picCollectionArray;
 };
@@ -133,10 +134,9 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((fulf
 });
 
 const getDeeplTranslationsForMany = async (picCollectionArray, authKey) => {
-  const progressWindow = remote.getGlobal('progressWindow');
   await Promise.all(picCollectionArray.map(async (currentPicCollection) => {
     await getDeeplTranslationsForOne(currentPicCollection, authKey);
-    if (progressWindow) progressWindow.webContents.send('progressStep');
+    mainProcess.progressStep();
   }));
   return picCollectionArray;
 };

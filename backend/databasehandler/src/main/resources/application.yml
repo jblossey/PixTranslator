@@ -1,6 +1,8 @@
 server:
   port: 4712
-
+  tomcat:
+    accesslog:
+      enabled: true
 spring:
   application:
     name: Databasehandler
@@ -14,6 +16,11 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        generate-statistics: true
   h2:
     console:
       enabled: true
@@ -21,12 +28,29 @@ spring:
       settings:
         trace: false
         web-allow-others: false
-
 management:
   endpoints:
     web:
       exposure:
         include: "*"
   endpoint:
+    health:
+      show-details: always
     shutdown:
       enabled: true
+logging:
+  level:
+#    general: debug
+    org:
+      hibernate:
+        stat: debug
+        type: trace
+      springframework:
+        web:
+          filter:
+            CommonsRequestLoggingFilter: DEBUG
+  file:
+    name: "databasehandler.log"
+    path: "./logs"
+  group:
+    general: "org.hibernate, org.springframework"

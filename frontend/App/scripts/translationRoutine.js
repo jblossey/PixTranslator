@@ -7,46 +7,46 @@ const Promise = require('promise');
 const needle = require('needle');
 
 class PicCollection {
-  picPath;
-
-  keywords;
-
-  caption;
-
-  translatedKeywords;
-
-  translatedCaption;
-
-  toSend
-
   constructor(picPath, keywords, caption) {
-    this.picPath = picPath;
-    this.keywords = keywords;
-    this.caption = caption;
-    this.translatedKeywords = [];
-    this.translatedCaption = '';
-    this.toSend = [caption];
+    this._picPath = picPath;
+    this._keywords = keywords;
+    this._caption = caption;
+    this._translatedKeywords = [];
+    this._translatedCaption = '';
+    this._toSend = [caption];
+    this._translationMapping = {};
   }
 
-  get picPath() { return this.picPath; }
+  get picPath() { return this._picPath; }
 
-  get keywords() { return this.keywords; }
+  get keywords() { return this._keywords; }
 
-  get caption() { return this.caption; }
+  get caption() { return this._caption; }
 
-  get translatedKeywords() { return this.translatedKeywords; }
+  get translatedKeywords() { return this._translatedKeywords; }
 
-  get translatedCaption() { return this.translatedCaption; }
+  get translatedCaption() { return this._translatedCaption; }
 
-  get toSend() { return this.toSend; }
+  get toSend() { return this._toSend; }
 
-  set translatedKeywords(translated) { this.translatedKeywords.push(translated).flat(Infinity); }
+  get translationMapping() { return this._translationMapping; }
 
-  set translatedCaption(translated) { this.translatedCaption = translated; }
+  set translatedKeywords(translated) {
+    this._translatedKeywords.push(translated);
+    this._translatedKeywords = this._translatedKeywords.flat(Infinity);
+  }
 
-  set toSend(untranslated) { this.toSend.push(untranslated).flat(Infinity); }
+  set translatedCaption(translated) { this._translatedCaption = translated; }
 
-  clearToSend() { this.toSend = []; }
+  set toSend(untranslated) {
+    this._toSend.push(untranslated);
+    // flatten and always keep the longest element (caption) at first place
+    this._toSend = this._toSend.flat(Infinity).sort((a, b) => -(a.length - b.length));
+  }
+
+  set translationMapping(translationArray) { this._translationMapping = translationArray; }
+
+  clearToSend() { this._toSend = []; }
 }
 
 const extractTranslationFromDatabaseCall = (dbResponse) => {
@@ -106,16 +106,20 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((fulf
     auth_key: authKey,
     source_lang: 'DE',
     target_lang: 'EN',
-    split_sentences: '0',
+    split_sentences: '0', // treat every requestparameter coherently
   };
   const requestData = picCollection.toSend.map((item) => `text=${encodeURIComponent(item)}`).join('&');
   needle('post', requestUrl, [deeplOptions, requestData]).then((response) => {
     try {
       if (response.statusCode === 200) {
         const { translations } = response.body;
-        translations.sort((a, b) => -(a.text.length - b.text.length));
+        const translationArray = [];
+        // eslint-disable-next-line max-len
+        // Deepl keeps the order so first element is always the longest (caption, see setter of toSend)
         picCollection.translatedCaption = translations.shift().text;
-        picCollection.translatedKeywords = translations.filter((entry) => entry.text).text;
+        translations.map((entry) => translationArray.push(entry.text));
+        picCollection.translatedKeywords = translationArray;
+        picCollection.translationMapping = [picCollection.toSend.slice(1), translationArray];
         picCollection.clearToSend();
         fulfill(picCollection);
       } else {

@@ -32,3 +32,19 @@ exports.countKeysAndCapChars = (keysAndCapToCount) =>
   // eslint-disable-next-line implicit-arrow-linebreak
   this.countKeywordChars(keysAndCapToCount.keywords)
   + keysAndCapToCount.caption[0].length;
+
+exports.writeKeywordsAndCaptionForOne = (picCollection) => {
+
+};
+
+exports.writeKeywordsAndCaptionForMany = (picCollectionArray) => {
+
+};
+
+exports.updateDatabaseForOne = (picCollection) => {
+
+};
+
+exports.updateDatabaseForMany = (picCollectionArray) => {
+
+};

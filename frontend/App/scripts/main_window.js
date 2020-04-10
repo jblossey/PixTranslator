@@ -7,6 +7,7 @@ const { remote, ipcRenderer } = require('electron');
 const needle = require('needle');
 const storage = require('electron-json-storage');
 const $ = require('jquery');
+const unhandled = require('electron-unhandled');
 // eslint-disable-next-line import/no-unresolved
 const metadatahandlerStub = require('./scripts/metadatahandlerStub');
 // eslint-disable-next-line import/no-unresolved
@@ -20,6 +21,8 @@ let picCollectionArray = [];
 
 let charCount;
 let charLim;
+
+unhandled();
 
 // TODO handle clicks and multi-select
 
@@ -166,7 +169,11 @@ ipcRenderer.on('startTranslation', (event) => {
         picCollectionArray,
         deeplKey,
       );
-      
+      await Promise.all([
+        metadatahandlerStub.writeKeywordsAndCaptionForMany(picCollectionArray),
+        // updateDatabase is allowed to fail
+        metadatahandlerStub.updateDatabaseForMany(picCollectionArray).catch((err) => err),
+      ]);
     } else {
       mainProcess.retrieveDeeplKeyViaWindow();
     }

@@ -1,4 +1,7 @@
 const { remote } = require('electron');
+const unhandled = require('electron-unhandled');
+
+unhandled();
 /* eslint-disable no-undef */
 // eslint-disable-next-line no-unused-vars
 function sendInfo() {

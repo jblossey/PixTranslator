@@ -153,6 +153,22 @@ function showPreExecutionNotice() {
   mainProcess.showPreExecutionNotice();
 }
 
+const reReadKeywordsAndCaptions = (reReadArray) => {
+  for (let i = 0, currentPicCollection; currentPicCollection = reReadArray[i]; i++) {
+    metadatahandlerStub.requestKeywordsAndCaption(currentPicCollection.picPath).then(
+      (keysAndCaps) => {
+        // eslint-disable-next-line no-undef
+        const currentPicRow = document.getElementById(`${currentPicCollection.picPath.replace(/\s/g, '')}`);
+        currentPicRow.cells[1].innerHTML = keysAndCaps.caption;
+        currentPicRow.cells[2].innerHTML = keysAndCaps.keywords.toString();
+        currentPicRow.cells[3].innerHTML = metadatahandlerStub.countKeywordChars(
+          metadatahandlerStub.countKeysAndCapChars(keysAndCaps),
+        );
+      },
+    );
+  }
+};
+
 // eslint-disable-next-line no-unused-vars
 ipcRenderer.on('startTranslation', (event) => {
   storage.get('deeplKey', async (error, data) => {
@@ -163,17 +179,23 @@ ipcRenderer.on('startTranslation', (event) => {
       const progressWindow = remote.getGlobal('progressWindow');
       // eslint-disable-next-line no-undef
       const totalPicNumber = document.getElementById('table_body').rows.length;
+      // +++ TRANSLATION +++
       if (progressWindow) progressWindow.webContents.send('initProgressbar', [totalPicNumber]);
       picCollectionArray = await translator.getDbTranslationsForMany(picCollectionArray);
       picCollectionArray = await translator.getDeeplTranslationsForMany(
         picCollectionArray,
         deeplKey,
       );
+      // +++ Writeback +++
       await Promise.all([
         metadatahandlerStub.writeKeywordsAndCaptionForMany(picCollectionArray),
         // updateDatabase is allowed to fail
         metadatahandlerStub.updateDatabaseForMany(picCollectionArray).catch((err) => err),
       ]);
+      // +++ RE-READ +++
+      reReadKeywordsAndCaptions(picCollectionArray);
+      // +++ TEARDOWN +++
+      mainProcess.showCompletedWindow();
     } else {
       mainProcess.retrieveDeeplKeyViaWindow();
     }

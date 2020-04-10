@@ -155,6 +155,31 @@ exports.showProgressWindow = () => {
   });
 };
 
+exports.showCompletedWindow = () => {
+  global.progressWindow.close();
+  global.completedWindow = new BrowserWindow({
+    parent: global.mainWindow,
+    modal: true,
+    width: 600,
+    height: 150,
+    center: true,
+    webPreferences: {
+      nodeIntegration: true,
+    },
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    titleBarStyle: 'hidden',
+  });
+  // global.preExecutionNotice.webContents.openDevTools();
+  global.completedWindow.removeMenu();
+  global.completedWindow.loadFile('./App/completedWindow.html');
+  global.completedWindow.on('closed', () => {
+    global.completedWindow = null;
+  });
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

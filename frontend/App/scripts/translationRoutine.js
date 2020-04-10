@@ -5,6 +5,8 @@
 const { remote } = require('electron');
 const Promise = require('promise');
 const needle = require('needle');
+// eslint-disable-next-line import/no-unresolved
+const { setDifference } = require('./setMethods');
 
 class PicCollection {
   constructor(picPath, keywords, caption) {
@@ -56,8 +58,6 @@ const extractTranslationFromDatabaseCall = (dbResponse) => {
   }
   return translations;
 };
-
-const setDifference = (minuend, subtrahend) => minuend.filter((x) => !subtrahend.includes(x));
 
 const extractUntranslatedKeywords = (originalCollection, rawDbResponse) => {
   const untranslatedArray = [];

@@ -2,6 +2,9 @@
 // eslint-disable-next-line no-unused-vars
 const { ipcRenderer } = require('electron');
 const $ = require('jquery');
+const unhandled = require('electron-unhandled');
+
+unhandled();
 
 let currentProgress = 0;
 let totalProgress;

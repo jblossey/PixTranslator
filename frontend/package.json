@@ -34,6 +34,7 @@
     "electron": "^8.2.0",
     "electron-json-storage": "^4.1.8",
     "electron-positioner": "^4.1.0",
+    "electron-progressbar": "^1.2.0",
     "electron-unhandled": "^3.0.2",
     "jquery": "^3.4.1",
     "minimal-request-promise": "^1.5.0",

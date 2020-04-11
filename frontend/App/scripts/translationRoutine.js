@@ -82,6 +82,7 @@ const getDbTranslationsForOne = (picCollection) => new Promise((fulfill, reject)
         const jsonBody = JSON.parse(response.body);
         picCollection.translatedKeywords = extractTranslationFromDatabaseCall(jsonBody);
         picCollection.toSend = extractUntranslatedKeywords(picCollection, jsonBody);
+        mainProcess.progressStep();
         fulfill(picCollection);
       } else {
         reject();
@@ -96,7 +97,6 @@ const getDbTranslationsForOne = (picCollection) => new Promise((fulfill, reject)
 const getDbTranslationsForMany = async (picCollectionArray) => {
   await Promise.all(picCollectionArray.map(async (currentPicCollection) => {
     await getDbTranslationsForOne(currentPicCollection);
-    mainProcess.progressStep();
   }));
   return picCollectionArray;
 };
@@ -122,6 +122,7 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((fulf
         picCollection.translatedKeywords = translationArray;
         picCollection.translationMapping = [picCollection.toSend.slice(1), translationArray];
         picCollection.clearToSend();
+        mainProcess.progressStep();
         fulfill(picCollection);
       } else {
         reject();
@@ -136,7 +137,6 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((fulf
 const getDeeplTranslationsForMany = async (picCollectionArray, authKey) => {
   await Promise.all(picCollectionArray.map(async (currentPicCollection) => {
     await getDeeplTranslationsForOne(currentPicCollection, authKey);
-    mainProcess.progressStep();
   }));
   return picCollectionArray;
 };

@@ -40,21 +40,21 @@ public class MetadatahandlerController {
     return getKeywordsAndCaption(picture);
   }
 
-  @PutMapping("/updateKeywords")
+  @PostMapping("/updateKeywords")
   public void updateKeywords(@RequestParam(name = "path") File picture, @RequestBody String[] keywords)
           throws ImageWriteException, ImageReadException, XMPException, IOException {
     log.info("Rewriting Keywords on " + picture.toString());
     rewriteKeywords(picture, keywords);
   }
 
-  @PutMapping("/updateCaption")
+  @PostMapping("/updateCaption")
   public void updateCaption(@RequestParam(name = "path") File picture, @RequestBody String caption)
           throws ImageWriteException, ImageReadException, XMPException, IOException {
     log.info("Rewriting Caption on " + picture.toString());
     rewriteCaption(picture, caption);
   }
 
-  @PutMapping("/updateKeywordsAndCaption")
+  @PostMapping("/updateKeywordsAndCaption")
   public void updateKeywordsAndCaption(@RequestParam(name = "path") File picture, @RequestBody HashMap<String,
           String[]> keysAndCap)
           throws ImageWriteException, IOException, XMPException, ImageReadException {

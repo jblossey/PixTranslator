@@ -41,18 +41,20 @@ exports.countKeysAndCapChars = (keysAndCapToCount) =>
   + keysAndCapToCount.caption[0].length;
 
 exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill, reject) => {
-  const requestURL = `http://localhost:4711/updateKeywordsAndCaption?path=${picCollection.picPath}}`;
+  const requestURL = `http://localhost:4711/updateKeywordsAndCaption?path=${picCollection.picPath}`;
   const requestData = {
     Keywords: picCollection.keywords.concat(picCollection.translatedKeywords),
-    Caption: [picCollection.caption + picCollection.translatedCaption],
+    Caption: [`${picCollection.caption}, ${picCollection.translatedCaption}`],
   };
   const requestOptions = {
     json: true,
   };
-  needle('put', requestURL, requestData, requestOptions).then((response) => {
+  needle('post', requestURL, requestData, requestOptions).then((response) => {
     try {
-      if (response.statusCode === 200) fulfill();
-      else reject();
+      if (response.statusCode === 200) {
+        mainProcess.progressStep();
+        fulfill('done');
+      } else reject();
     } catch (error) {
       reject(error);
     }
@@ -62,7 +64,6 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
 exports.writeKeywordsAndCaptionForMany = async (picCollectionArray) => {
   await Promise.all(picCollectionArray.map(async (currentPicCollection) => {
     await this.writeKeywordsAndCaptionForOne(currentPicCollection);
-    mainProcess.progressStep();
   }));
 };
 

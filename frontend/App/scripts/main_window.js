@@ -181,11 +181,7 @@ const startTranslationRoutine = () => {
       // eslint-disable-next-line no-undef
       const totalPicNumber = document.getElementById('table_body').rows.length;
       // +++ TRANSLATION +++const mainProcess = remote.require('./main.js');
-      ipcRenderer.send('showProgressWindow', 5);
-      setInterval(function() {
-        ipcRenderer.send('progressStep');
-      }, 2000)
-      /*
+      ipcRenderer.send('showProgressWindow', totalPicNumber);
       picCollectionArray = await translator.getDbTranslationsForMany(picCollectionArray);
       picCollectionArray = await translator.getDeeplTranslationsForMany(
         picCollectionArray,
@@ -201,7 +197,6 @@ const startTranslationRoutine = () => {
       reReadKeywordsAndCaptions(picCollectionArray);
       // +++ TEARDOWN +++
       mainProcess.showCompletedWindow();
-     */
     } else {
       mainProcess.retrieveDeeplKeyViaWindow();
     }

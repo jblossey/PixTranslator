@@ -2,7 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-cond-assign */
 /* eslint-disable no-plusplus */
-const { remote } = require('electron');
+const { remote, ipcRenderer } = require('electron');
 const Promise = require('promise');
 const needle = require('needle');
 // eslint-disable-next-line import/no-unresolved
@@ -82,7 +82,7 @@ const getDbTranslationsForOne = (picCollection) => new Promise((fulfill, reject)
         const jsonBody = JSON.parse(response.body);
         picCollection.translatedKeywords = extractTranslationFromDatabaseCall(jsonBody);
         picCollection.toSend = extractUntranslatedKeywords(picCollection, jsonBody);
-        mainProcess.progressStep();
+        ipcRenderer.send('progressStep');
         fulfill(picCollection);
       } else {
         reject();
@@ -122,7 +122,7 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((fulf
         picCollection.translatedKeywords = translationArray;
         picCollection.translationMapping = [picCollection.toSend.slice(1), translationArray];
         picCollection.clearToSend();
-        mainProcess.progressStep();
+        ipcRenderer.send('progressStep');
         fulfill(picCollection);
       } else {
         reject();

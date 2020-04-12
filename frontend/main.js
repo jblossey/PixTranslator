@@ -8,14 +8,13 @@ let serverProcess = require('child_process');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-global.mainWindow = null;
-global.retrievalWindow = null;
-global.preExecutionNotice = null;
+let mainWindow;
+let retrievalWindow;
 let progressBarWindow;
 let DEEPL_KEY = null;
 
 // enable user-friendly handling of unhandled errors
-unhandled();
+//unhandled();
 // TODO Add electron "about this app"-window -> see https://github.com/rhysd/electron-about-window
 // TODO Replace ipc communication with electron router -> see https://github.com/m0n0l0c0/electron-router
 
@@ -46,7 +45,7 @@ const spawnBackendServices = () => {
 
 const startGui = function createMainWindow() {
   // Create the browser window.
-  global.mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1240,
     height: 800,
     webPreferences: {
@@ -58,28 +57,27 @@ const startGui = function createMainWindow() {
     'title-bar-style': 'hidden',
   });
 
-  global.mainWindow.removeMenu();
+  mainWindow.removeMenu();
 
   // and load the index.html of the app.
-  global.mainWindow.loadFile('./App/index.html');
+  mainWindow.loadFile('./App/index.html');
 
   // Open the DevTools.
-  // global.mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
-  global.mainWindow.on('closed', () => {
+  mainWindow.on('closed', () => {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    global.mainWindow = null;
-    global.preExecutionNotice = null;
-    global.retrievalWindow = null;
+    mainWindow = null;
+    retrievalWindow = null;
   });
 };
 
 exports.retrieveDeeplKeyViaWindow = function startRetrieveWindows() {
-  global.retrievalWindow = new BrowserWindow({
-    parent: global.mainWindow,
+  retrievalWindow = new BrowserWindow({
+    parent: mainWindow,
     modal: true,
     width: 600,
     height: 200,
@@ -93,25 +91,26 @@ exports.retrieveDeeplKeyViaWindow = function startRetrieveWindows() {
     maximizable: false,
     titleBarStyle: 'hidden',
   });
-  // global.retrievalWindow.webContents.openDevTools();
-  global.retrievalWindow.removeMenu();
-  global.retrievalWindow.loadFile('./App/retrievalWindow.html');
-  global.retrievalWindow.on('closed', () => {
+  // retrievalWindow.webContents.openDevTools();
+  retrievalWindow.removeMenu();
+  retrievalWindow.loadFile('./App/retrievalWindow.html');
+  retrievalWindow.on('closed', () => {
     if (!DEEPL_KEY) app.quit();
-    global.retrievalWindow = null;
+    retrievalWindow = null;
   });
 };
 
 exports.closeRetrievalWindow = () => {
-  global.retrievalWindow.close();
+  retrievalWindow.close();
 };
 
-exports.setLocalDeeplKey = (key) => {
+exports.setLocalDeeplKey = (key, saveCheck) => {
   DEEPL_KEY = key;
+  mainWindow.webContents.send('key_ready', [key, saveCheck])
 };
 
 exports.showPreExecutionNotice = () => {
-  return dialog.showMessageBoxSync(global.mainWindow, {
+  return dialog.showMessageBoxSync(mainWindow, {
     type: 'question',
     buttons: [
       'I execute this program at my own risk.',
@@ -135,36 +134,30 @@ function showProgressWindow (totalPicCount) {
   global.progressTotal = totalPicCount * 4; // 4 times totalPicnumber (dbtranslate, deepltranslate, writing, rereading)
   progressBarWindow = new ProgressBar({
     indeterminate: false,
-    browserwindow: {
-      parent: global.mainWindow,
+    browserWindow: {
+      parent: mainWindow,
       text: 'Preparing data...',
       webPreferences: {
         nodeIntegration: true,
       },
     },
   });
-  /*
   progressBarWindow
     .on('completed', () => {
-      dialog.showMessageBoxSync(progressBarWindow, {
-        type: 'info',
-        title: 'Task complete',
-        message: 'Translation done.',
-      });
+      progressBarWindow.close();
     })
     .on('aborted', (value) => {
       console.info(`aborted... ${value}`);
     })
     .on('progress', (value) => {
       progressBarWindow.text = `Value ${value} out of ${progressBarWindow.getOptions().maxValue}...`;
-    });*/
+    });
 }
 
 function progressStep () {
   if(progressBarWindow){
     global.progressCounter++;
     const progressInPercent = global.progressCounter / global.progressTotal;
-    console.info(progressInPercent);
     progressBarWindow.value = progressInPercent < 0.5
       ? Math.ceil(progressInPercent * 100)
       : Math.floor(progressInPercent * 100);
@@ -174,8 +167,14 @@ function progressStep () {
 exports.showCompletedWindow = () => {
   if(progressBarWindow) {
     progressBarWindow.setCompleted();
-    progressBarWindow = null;
   }
+  dialog.showMessageBoxSync(mainWindow, {
+    type: 'info',
+    title: 'Task complete',
+    message: 'Translation done.',
+    buttons: ['OK'],
+    normalizeAccessKeys: true,
+  });
 };
 
 // This method will be called when Electron has finished
@@ -205,7 +204,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
 // On macOS it's common to re-create a window in the app when the
 // dock icon is clicked and there are no other windows open.
-  if (global.mainWindow === null) {
+  if (mainWindow === null) {
     startGui();
   }
 });

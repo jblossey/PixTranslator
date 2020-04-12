@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 const needle = require('needle');
 const Promise = require('promise');
-const { remote } = require('electron');
+const { remote, ipcRenderer } = require('electron');
 const assert = require('assert');
 // eslint-disable-next-line import/no-unresolved
 const { translationMappingUnion } = require('./setMethods');
@@ -52,7 +52,7 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
   needle('post', requestURL, requestData, requestOptions).then((response) => {
     try {
       if (response.statusCode === 200) {
-        mainProcess.progressStep();
+        ipcRenderer.send('progressStep');
         fulfill('done');
       } else reject();
     } catch (error) {

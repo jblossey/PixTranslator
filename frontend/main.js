@@ -137,13 +137,13 @@ function showProgressWindow (totalPicCount) {
     indeterminate: false,
     browserwindow: {
       parent: global.mainWindow,
-      title: 'Translating...',
       text: 'Preparing data...',
       webPreferences: {
         nodeIntegration: true,
       },
     },
   });
+  /*
   progressBarWindow
     .on('completed', () => {
       dialog.showMessageBoxSync(progressBarWindow, {
@@ -157,13 +157,14 @@ function showProgressWindow (totalPicCount) {
     })
     .on('progress', (value) => {
       progressBarWindow.text = `Value ${value} out of ${progressBarWindow.getOptions().maxValue}...`;
-    });
+    });*/
 }
 
 function progressStep () {
   if(progressBarWindow){
     global.progressCounter++;
     const progressInPercent = global.progressCounter / global.progressTotal;
+    console.info(progressInPercent);
     progressBarWindow.value = progressInPercent < 0.5
       ? Math.ceil(progressInPercent * 100)
       : Math.floor(progressInPercent * 100);

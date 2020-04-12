@@ -1,6 +1,6 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-console */
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const requestPromise = require('minimal-request-promise');
 const unhandled = require('electron-unhandled');
 const ProgressBar = require('electron-progressbar');
@@ -11,6 +11,7 @@ let serverProcess = require('child_process');
 global.mainWindow = null;
 global.retrievalWindow = null;
 global.preExecutionNotice = null;
+let progressBarWindow;
 let DEEPL_KEY = null;
 
 // enable user-friendly handling of unhandled errors
@@ -110,80 +111,70 @@ exports.setLocalDeeplKey = (key) => {
 };
 
 exports.showPreExecutionNotice = () => {
-  global.preExecutionNotice = new BrowserWindow({
-    parent: global.mainWindow,
-    modal: true,
-    width: 600,
-    height: 350,
-    center: true,
-    webPreferences: {
-      nodeIntegration: true,
-    },
-    resizable: false,
-    movable: false,
-    minimizable: false,
-    maximizable: false,
-    titleBarStyle: 'hidden',
-  });
-  // global.preExecutionNotice.webContents.openDevTools();
-  global.preExecutionNotice.removeMenu();
-  global.preExecutionNotice.loadFile('./App/preExecutionNotice.html');
-  global.preExecutionNotice.on('closed', () => {
-    global.preExecutionNotice = null;
+  return dialog.showMessageBoxSync(global.mainWindow, {
+    type: 'question',
+    buttons: [
+      'I execute this program at my own risk.',
+      'Better not risk it.',
+    ],
+    defaultId: 1,
+    title: 'Are you sure?',
+    message: `
+    This program works on your files in binary.
+    Changes made can not be reverted so you better only let this program work on copies of your pictures.
+    The author of this program by no means guarantees that every operation will work out as expected.
+    For further information on warranty etc. please refer to the MIT License under which this program is published.
+    `,
+    cancelId: 1,
   });
 };
 
-exports.showProgressWindow = (totalPicCount) => {
+function showProgressWindow (totalPicCount) {
+  if(progressBarWindow) return;
   global.progressCounter = 0;
-  global.progressBarWindow = new ProgressBar({
+  global.progressTotal = totalPicCount * 4; // 4 times totalPicnumber (dbtranslate, deepltranslate, writing, rereading)
+  progressBarWindow = new ProgressBar({
+    indeterminate: false,
     browserwindow: {
-      indeterminate: false,
       parent: global.mainWindow,
-      modal: true,
-      resizable: false,
-      closable: false,
-      minimizable: false,
-      maximizable: false,
-      width: 500,
-      height: 170,
+      title: 'Translating...',
+      text: 'Preparing data...',
       webPreferences: {
         nodeIntegration: true,
       },
-      maxValue: totalPicCount * 4, // 4 times totalPicnumber (dbtranslate, deepltranslate, writing, rereading)
-      value: 0,
-      title: 'Translating...',
-      text: 'Preparing data...',
     },
   });
-  global.progressBarWindow
+  progressBarWindow
     .on('completed', () => {
-      dialog.showMessageBoxSync(global.progressBarWindow, {
+      dialog.showMessageBoxSync(progressBarWindow, {
         type: 'info',
         title: 'Task complete',
         message: 'Translation done.',
-      }, () => {
-        global.progressBarWindow.close();
       });
     })
     .on('aborted', (value) => {
       console.info(`aborted... ${value}`);
     })
     .on('progress', (value) => {
-      // global.progressBarWindow.detail = `Value ${value} out of ${global.progressBarWindow.getOptions().maxValue}...`;
+      progressBarWindow.text = `Value ${value} out of ${progressBarWindow.getOptions().maxValue}...`;
     });
-};
+}
 
-exports.progressStep = () => {
-  global.progressCounter++;
-  const progressInPercent = global.progressCounter / global.progressBarWindow.getOptions().maxValue;
-  global.progressBarWindow.value = progressInPercent < 0.5
-    ? Math.ceil(progressInPercent * 100)
-    : Math.floor(progressInPercent * 100);
-};
+function progressStep () {
+  if(progressBarWindow){
+    global.progressCounter++;
+    const progressInPercent = global.progressCounter / global.progressTotal;
+    progressBarWindow.value = progressInPercent < 0.5
+      ? Math.ceil(progressInPercent * 100)
+      : Math.floor(progressInPercent * 100);
+  }
+}
 
 exports.showCompletedWindow = () => {
-  global.progressBarWindow.setCompleted();
-  global.progressBarWindow = null;
+  if(progressBarWindow) {
+    progressBarWindow.setCompleted();
+    progressBarWindow = null;
+  }
 };
 
 // This method will be called when Electron has finished
@@ -192,6 +183,8 @@ exports.showCompletedWindow = () => {
 app.on('ready', () => {
   spawnBackendServices();
   startGui();
+  ipcMain.on('showProgressWindow', (event, message) => showProgressWindow(message));
+  ipcMain.on('progressStep', progressStep);
 });
 
 // Quit when all windows are closed.

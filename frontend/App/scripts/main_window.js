@@ -150,7 +150,9 @@ function removeAllItemsFromTable() {
 
 // eslint-disable-next-line no-unused-vars
 function showPreExecutionNotice() {
-  mainProcess.showPreExecutionNotice();
+  if(mainProcess.showPreExecutionNotice() === 0){
+    startTranslationRoutine();
+  };
 }
 
 const reReadKeywordsAndCaptions = (reReadArray) => {
@@ -170,16 +172,20 @@ const reReadKeywordsAndCaptions = (reReadArray) => {
   }
 };
 
-// eslint-disable-next-line no-unused-vars
-ipcRenderer.on('startTranslation', (event) => {
+const startTranslationRoutine = () => {
   storage.get('deeplKey', async (error, data) => {
     if (error) throw error;
+    data.deeplKey = 'jo';
     if (data.deeplKey) {
       const { deeplKey } = data;
       // eslint-disable-next-line no-undef
       const totalPicNumber = document.getElementById('table_body').rows.length;
       // +++ TRANSLATION +++const mainProcess = remote.require('./main.js');
-      mainProcess.showProgressWindow(totalPicNumber);
+      ipcRenderer.send('showProgressWindow', 5);
+      setInterval(function() {
+        ipcRenderer.send('progressStep');
+      }, 2000)
+      /*
       picCollectionArray = await translator.getDbTranslationsForMany(picCollectionArray);
       picCollectionArray = await translator.getDeeplTranslationsForMany(
         picCollectionArray,
@@ -195,11 +201,12 @@ ipcRenderer.on('startTranslation', (event) => {
       reReadKeywordsAndCaptions(picCollectionArray);
       // +++ TEARDOWN +++
       mainProcess.showCompletedWindow();
+     */
     } else {
       mainProcess.retrieveDeeplKeyViaWindow();
     }
   });
-});
+};
 
 const checkServiceHealth = (service, port) => {
   needle.get(`http://localhost:${port}/actuator/health`, (err, response) => {

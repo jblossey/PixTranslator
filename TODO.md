@@ -1,5 +1,7 @@
 # TODO
 
++ package and auto-update via electron builder (https://github.com/electron-userland/electron-builder)
+
 + probably include https://babeljs.io/docs/en/#jsx-and-react and rewrite dom manipulation with jsx (if possible)
 + Add Github Badges
 + Redesign GUI with Bootstrap and React

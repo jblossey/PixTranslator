@@ -22,7 +22,7 @@ let picCollectionArray = [];
 let charCount;
 let charLim;
 
-//unhandled();
+unhandled();
 
 // TODO handle clicks and multi-select
 
@@ -148,13 +148,6 @@ function removeAllItemsFromTable() {
   picCollectionArray = [];
 }
 
-// eslint-disable-next-line no-unused-vars
-function showPreExecutionNotice() {
-  if(mainProcess.showPreExecutionNotice() === 0){
-    startTranslationRoutine();
-  };
-}
-
 const reReadKeywordsAndCaptions = (reReadArray) => {
   for (let i = 0, currentPicCollection; currentPicCollection = reReadArray[i]; i++) {
     metadatahandlerStub.requestKeywordsAndCaption(currentPicCollection.picPath).then(
@@ -190,7 +183,7 @@ const startTranslationRoutine = () => {
       await Promise.all([
         await metadatahandlerStub.writeKeywordsAndCaptionForMany(picCollectionArray),
         // updateDatabase is allowed to fail
-        await metadatahandlerStub.updateDatabaseForMany(picCollectionArray)//.catch((err) => console.error(err)),
+        await metadatahandlerStub.updateDatabaseForMany(picCollectionArray),
       ]);
       // +++ RE-READ +++
       reReadKeywordsAndCaptions(picCollectionArray);
@@ -201,6 +194,13 @@ const startTranslationRoutine = () => {
     }
   });
 };
+
+// eslint-disable-next-line no-unused-vars
+function showPreExecutionNotice() {
+  if (mainProcess.showPreExecutionNotice() === 0) {
+    startTranslationRoutine();
+  }
+}
 
 const checkServiceHealth = (service, port) => {
   needle.get(`http://localhost:${port}/actuator/health`, (err, response) => {

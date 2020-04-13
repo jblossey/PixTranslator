@@ -1,6 +1,8 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-console */
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const {
+  app, BrowserWindow, dialog, ipcMain,
+} = require('electron');
 const requestPromise = require('minimal-request-promise');
 const unhandled = require('electron-unhandled');
 const ProgressBar = require('electron-progressbar');
@@ -14,7 +16,7 @@ let progressBarWindow;
 let DEEPL_KEY = null;
 
 // enable user-friendly handling of unhandled errors
-//unhandled();
+unhandled();
 // TODO Add electron "about this app"-window -> see https://github.com/rhysd/electron-about-window
 // TODO Replace ipc communication with electron router -> see https://github.com/m0n0l0c0/electron-router
 
@@ -106,32 +108,31 @@ exports.closeRetrievalWindow = () => {
 
 exports.setLocalDeeplKey = (key, saveCheck) => {
   DEEPL_KEY = key;
-  mainWindow.webContents.send('key_ready', [key, saveCheck])
+  mainWindow.webContents.send('key_ready', [key, saveCheck]);
 };
 
-exports.showPreExecutionNotice = () => {
-  return dialog.showMessageBoxSync(mainWindow, {
-    type: 'question',
-    buttons: [
-      'I execute this program at my own risk.',
-      'Better not risk it.',
-    ],
-    defaultId: 1,
-    title: 'Are you sure?',
-    message: `
-    This program works on your files in binary.
-    Changes made can not be reverted so you better only let this program work on copies of your pictures.
-    The author of this program by no means guarantees that every operation will work out as expected.
-    For further information on warranty etc. please refer to the MIT License under which this program is published.
-    `,
-    cancelId: 1,
-  });
-};
+exports.showPreExecutionNotice = () => dialog.showMessageBoxSync(mainWindow, {
+  type: 'question',
+  buttons: [
+    'I execute this program at my own risk.',
+    'Better not risk it.',
+  ],
+  defaultId: 1,
+  title: 'Are you sure?',
+  message: `
+  This program works on your files in binary.
+  Changes made can not be reverted so you better only let this program work on copies of your pictures.
+  The author of this program by no means guarantees that every operation will work out as expected.
+  For further information on warranty etc. please refer to the MIT License under which this program is published.
+  `,
+  cancelId: 1,
+});
 
-function showProgressWindow (totalPicCount) {
-  if(progressBarWindow) return;
+function showProgressWindow(totalPicCount) {
+  if (progressBarWindow) return;
   global.progressCounter = 0;
-  global.progressTotal = totalPicCount * 4; // 4 times totalPicnumber (dbtranslate, deepltranslate, writing, rereading)
+  // 4 times totalPicnumber (dbtranslate, deepltranslate, writing, rereading)
+  global.progressTotal = totalPicCount * 4;
   progressBarWindow = new ProgressBar({
     indeterminate: false,
     browserWindow: {
@@ -154,8 +155,8 @@ function showProgressWindow (totalPicCount) {
     });
 }
 
-function progressStep () {
-  if(progressBarWindow){
+function progressStep() {
+  if (progressBarWindow) {
     global.progressCounter++;
     const progressInPercent = global.progressCounter / global.progressTotal;
     progressBarWindow.value = progressInPercent < 0.5
@@ -165,7 +166,7 @@ function progressStep () {
 }
 
 exports.showCompletedWindow = () => {
-  if(progressBarWindow) {
+  if (progressBarWindow) {
     progressBarWindow.setCompleted();
   }
   dialog.showMessageBoxSync(mainWindow, {

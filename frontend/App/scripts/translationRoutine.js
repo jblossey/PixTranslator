@@ -2,13 +2,11 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-cond-assign */
 /* eslint-disable no-plusplus */
-const { remote, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 const Promise = require('promise');
 const needle = require('needle');
 // eslint-disable-next-line import/no-unresolved
 const { setDifference } = require('./setMethods');
-
-const mainProcess = remote.require('./main.js');
 
 class PicCollection {
   constructor(picPath, keywords, caption) {

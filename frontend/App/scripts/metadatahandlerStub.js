@@ -3,12 +3,10 @@
 /* eslint-disable no-console */
 const needle = require('needle');
 const Promise = require('promise');
-const { remote, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 const assert = require('assert');
 // eslint-disable-next-line import/no-unresolved
 const { translationMappingUnion } = require('./setMethods');
-
-const mainProcess = remote.require('./main.js');
 
 exports.requestKeywordsAndCaption = (picPath) => new Promise((fulfill, reject) => {
   let keywords;
@@ -53,7 +51,7 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
     try {
       if (response.statusCode === 200) {
         ipcRenderer.send('progressStep');
-        console.info(`Done with ${picCollection.picPath}`)
+        console.info(`Done with ${picCollection.picPath}`);
         fulfill('done');
       } else {
         console.error(`+++++++++++
@@ -66,7 +64,7 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
     } catch (error) {
       console.error(
         `Error while writing to ${picCollection.picPath}
-        Error Message: ${error}`
+        Error Message: ${error}`,
       );
       reject(error);
     }
@@ -100,8 +98,7 @@ exports.updateDatabaseForOne = (translationMapping) => new Promise((fulfill, rej
         Response body: ${response.body}
         ++++++++++++++`);
         reject();
-      }
-      else if (i === translationMapping[0].length-1) fulfill();
+      } else if (i === translationMapping[0].length - 1) fulfill();
     });
   }
 });

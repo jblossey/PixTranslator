@@ -20,7 +20,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        generate-statistics: true
+        generate-statistics: false
   h2:
     console:
       enabled: true
@@ -40,17 +40,17 @@ management:
       enabled: true
 logging:
   level:
-#    general: debug
-    org:
-      hibernate:
-        stat: debug
-        type: trace
-      springframework:
-        web:
-          filter:
-            CommonsRequestLoggingFilter: DEBUG
+    general: info
+#    org:
+#      hibernate:
+#        stat: debug
+#        type: trace
+#      springframework:
+#        web:
+#          filter:
+#            CommonsRequestLoggingFilter: DEBUG
   file:
     name: "databasehandler.log"
-    path: "./logs"
+    path: "./logs/"
   group:
     general: "org.hibernate, org.springframework"

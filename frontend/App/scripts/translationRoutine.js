@@ -85,10 +85,16 @@ const getDbTranslationsForOne = (picCollection) => new Promise((fulfill, reject)
         ipcRenderer.send('progressStep');
         fulfill(picCollection);
       } else {
+        console.error(`+++++++++++
+        Error getting DB translation for ${picCollection.picPath}.
+        Response Status: ${response.statusCode}, ${response.statusMessage}
+        Response body: ${response.body}
+        ++++++++++++++`);
         reject();
       }
       // TODO proper handling of single outages during db call
     } catch (error) {
+      console.error(error);
       reject(error);
     }
   });
@@ -125,10 +131,16 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((fulf
         ipcRenderer.send('progressStep');
         fulfill(picCollection);
       } else {
+        console.error(`+++++++++++
+        Error getting DeeplTranslation for ${picCollection.picPath}.
+        Response Status: ${response.statusCode}, ${response.statusMessage}
+        Response body: ${response.body}
+        ++++++++++++++`);
         reject();
       }
       // TODO proper handling of single outages during deepl call
     } catch (error) {
+      console.error(error);
       reject(error);
     }
   });

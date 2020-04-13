@@ -175,6 +175,7 @@ exports.showCompletedWindow = () => {
     buttons: ['OK'],
     normalizeAccessKeys: true,
   });
+  progressBarWindow = null;
 };
 
 // This method will be called when Electron has finished

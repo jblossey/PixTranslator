@@ -22,7 +22,7 @@ let picCollectionArray = [];
 let charCount;
 let charLim;
 
-unhandled();
+//unhandled();
 
 // TODO handle clicks and multi-select
 
@@ -166,7 +166,7 @@ const reReadKeywordsAndCaptions = (reReadArray) => {
         currentPicRow.cells[3].innerHTML = metadatahandlerStub.countKeywordChars(
           metadatahandlerStub.countKeysAndCapChars(keysAndCaps),
         );
-        mainProcess.progressStep();
+        ipcRenderer.send('progressStep');
       },
     );
   }
@@ -175,7 +175,6 @@ const reReadKeywordsAndCaptions = (reReadArray) => {
 const startTranslationRoutine = () => {
   storage.get('deeplKey', async (error, data) => {
     if (error) throw error;
-    data.deeplKey = 'jo';
     if (data.deeplKey) {
       const { deeplKey } = data;
       // eslint-disable-next-line no-undef
@@ -189,9 +188,9 @@ const startTranslationRoutine = () => {
       );
       // +++ Writeback +++
       await Promise.all([
-        metadatahandlerStub.writeKeywordsAndCaptionForMany(picCollectionArray),
+        await metadatahandlerStub.writeKeywordsAndCaptionForMany(picCollectionArray),
         // updateDatabase is allowed to fail
-        metadatahandlerStub.updateDatabaseForMany(picCollectionArray).catch((err) => err),
+        await metadatahandlerStub.updateDatabaseForMany(picCollectionArray)//.catch((err) => console.error(err)),
       ]);
       // +++ RE-READ +++
       reReadKeywordsAndCaptions(picCollectionArray);

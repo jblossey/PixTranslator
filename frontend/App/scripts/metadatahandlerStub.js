@@ -53,9 +53,21 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
     try {
       if (response.statusCode === 200) {
         ipcRenderer.send('progressStep');
+        console.info(`Done with ${picCollection.picPath}`)
         fulfill('done');
-      } else reject();
+      } else {
+        console.error(`+++++++++++
+        Error writing to ${picCollection.picPath}.
+        Response Status: ${response.statusCode}, ${response.statusMessage}
+        Response body: ${response.body}
+        ++++++++++++++`);
+        reject();
+      }
     } catch (error) {
+      console.error(
+        `Error while writing to ${picCollection.picPath}
+        Error Message: ${error}`
+      );
       reject(error);
     }
   });
@@ -74,14 +86,22 @@ exports.updateDatabaseForOne = (translationMapping) => new Promise((fulfill, rej
     json: true,
   };
   assert(translationMapping[0].length === translationMapping[1].length);
+  if (translationMapping[0].length === 0) fulfill();
   for (let i = 0; i < translationMapping[0].length; i++) {
     const native = translationMapping[0][i];
     const translation = translationMapping[1][i];
     const requestData = { german: native, english: translation };
     // eslint-disable-next-line max-len
     needle('post', requestURL, requestData, requestOptions).then((response) => {
-      if (response.statusCode !== 200) reject();
-      else fulfill();
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        console.error(`+++++++++++
+        Error updating DB at mapping ${native} - ${translation}.
+        Response Status: ${response.statusCode}, ${response.statusMessage}
+        Response body: ${response.body}
+        ++++++++++++++`);
+        reject();
+      }
+      else if (i === translationMapping[0].length-1) fulfill();
     });
   }
 });

@@ -17,12 +17,12 @@ management:
     shutdown:
       enabled: true
 logging:
-  level:
-    org:
-      springframework:
-        web:
-          filter:
-            CommonsRequestLoggingFilter: DEBUG
+  level: info
+#    org:
+#      springframework:
+#        web:
+#          filter:
+#            CommonsRequestLoggingFilter: DEBUG
   file:
     name: "metadatahandler.log"
-    path: "./logs"
+    path: "./logs/"

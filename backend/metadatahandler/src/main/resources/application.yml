@@ -16,8 +16,8 @@ management:
       show-details: always
     shutdown:
       enabled: true
-logging:
-  level: info
+#logging:
+#  level:
 #    org:
 #      springframework:
 #        web:

@@ -33,7 +33,7 @@ const spawnBackendServices = () => {
   ];
 
   // Check operating system
-  const platform = process;
+  const { platform } = process;
   backendBinaries.forEach((binary) => {
     if (platform === 'win32') {
       serverProcess.execFile(`${app.getAppPath()}/${binary}.exe`);

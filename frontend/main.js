@@ -7,6 +7,7 @@ const requestPromise = require('minimal-request-promise');
 const unhandled = require('electron-unhandled');
 const ProgressBar = require('electron-progressbar');
 let serverProcess = require('child_process');
+const {autoUpdater} = require("electron-updater");
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -35,13 +36,20 @@ const spawnBackendServices = () => {
   const platform = process;
   backendBinaries.forEach((binary) => {
     if (platform === 'win32') {
+      serverProcess.execFile(`${app.getAppPath()}/${binary}.exe`);
+    } else {
+      serverProcess.execFile(`${app.getAppPath()}/${binary}.jar`);
+    }
+    /*
+    if (platform === 'win32') {
       serverProcess.spawn('cmd.exe', ['/c', `${binary}.exe`],
         {
-          cwd: `${app.getAppPath()}/bin`,
+          cwd: `${app.getAppPath()}`,
         });
     } else {
-      serverProcess.spawn(`${app.getAppPath()}/bin/${binary}.jar`);
+      serverProcess.spawn(`${app.getAppPath()}/${binary}.jar`);
     }
+    */
   });
 };
 
@@ -183,6 +191,7 @@ exports.showCompletedWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+  //autoUpdater.checkForUpdatesAndNotify();
   spawnBackendServices();
   startGui();
   ipcMain.on('showProgressWindow', (event, message) => showProgressWindow(message));

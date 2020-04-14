@@ -27,6 +27,7 @@ hs_err_pid*
 .settings
 .project
 .classpath
+dist/
 
 *.iml
 .DS_Store

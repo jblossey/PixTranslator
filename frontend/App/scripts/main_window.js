@@ -1,120 +1,233 @@
-const request = require('request');
-const jetpack = require('fs-jetpack');
-const remote = require('electron').remote;
-const main_process = remote.require('./main.js');
-const ipc = require('electron').ipcRenderer;
+/* eslint-disable no-continue */
+/* eslint-disable no-cond-assign */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-loop-func */
+/* eslint-disable no-restricted-syntax */
+const { remote, ipcRenderer } = require('electron');
+const needle = require('needle');
+const storage = require('electron-json-storage');
+const $ = require('jquery');
+const unhandled = require('electron-unhandled');
+// eslint-disable-next-line import/no-unresolved
+const metadatahandlerStub = require('./scripts/metadatahandlerStub');
+// eslint-disable-next-line import/no-unresolved
+const translator = require('./scripts/translationRoutine');
 
-let DEEPL_KEY = null;//'27c44ce2-ddbb-47ed-e8c6-1809382b6000';//TODO Assign null on publish
-let DEEPL_KEY_FILE = 'translation_access.dat';
-let CWD = null;//'C:/Users/janni/Desktop/iptc_translator/photon_GUI'//TODO assign null on publish, specify path on debugging
+const mainProcess = remote.require('./main.js');
 
-let char_count, char_lim;
+// '27c44ce2-ddbb-47ed-e8c6-1809382b6000';// TODO delete
+
+let picCollectionArray = [];
+
+let charCount;
+let charLim;
+
+unhandled();
+
+// TODO handle clicks and multi-select
+
+function fetchDeeplCharCount(key) {
+  if (key === null) {
+    // eslint-disable-next-line no-use-before-define
+    getDeeplKey();
+    return;
+  }
+  needle.get(encodeURI(`https://api.deepl.com/v2/usage?auth_key=${key}`), (error, response) => {
+    if (!error && response.statusCode === 200) {
+      charCount = response.body.character_count;
+      charLim = response.body.character_limit;
+    }
+    // eslint-disable-next-line no-undef
+    $('#deepl_character_count').text(`Characters left on Deepl: ${charLim - charCount}`);
+  });
+  // return {character_count: charCount, character_limit: charLim};
+}
 
 /**
- * Either fetches the Deepl-Key from const DEEPL_KEY_FILE
+ * Either fetches the Deepl-Key from const deeplKey_FILE
  * or
  * provokes a form window to be shown for the user to input the key
  */
-function getDeeplKey(){
-    var read_data;
-    if ( (read_data = jetpack.read('./'+DEEPL_KEY_FILE, 'utf8')) ){
-        DEEPL_KEY = read_data;
-        fetchDeeplCharCount(DEEPL_KEY);
+async function getDeeplKey() {
+  storage.get('deeplKey', (error, data) => {
+    if (error) throw error;
+    if (data.deeplKey) {
+      fetchDeeplCharCount(data.deeplKey);
+    } else {
+      mainProcess.retrieveDeeplKeyViaWindow();
     }
-    else{
-        main_process.retrieveDeeplKeyViaWindow();
-        //fetchDeeplCharCount call is done by ipc from retrieval_window
-    }
+  });
 }
 
-ipc.on('key_ready', (event, message) => {
-    DEEPL_KEY = message[0];
-    if (DEEPL_KEY){
-        jetpack.write('./'+DEEPL_KEY_FILE, DEEPL_KEY);
-        fetchDeeplCharCount(DEEPL_KEY);
-        const retrieval_window = remote.getGlobal('retrievalWindow');
-        if (retrieval_window) {retrieval_window.webContents.send('key_ack');}
+ipcRenderer.on('key_ready', (event, message) => {
+  const deeplKey = message[0];
+  if (deeplKey) {
+    if (message[1]) {
+      storage.set('deeplKey', { deeplKey }, (error) => {
+        if (error) throw error;
+      });
     }
+    fetchDeeplCharCount(deeplKey);
+    mainProcess.closeRetrievalWindow();
+  }
 });
 
-function fetchDeeplCharCount(key){
-    //global variabel DEEPL_KEY can be set for convenience during dev
-    //in every user-case it should be null
-    if (key == null){
-        getDeeplKey();
-        return;
-    }
-    request('https://api.deepl.com/v2/usage?auth_key='+key, function(error, response, body){
-        if(!error && response.statusCode == 200){
-            const values = JSON.parse(body);
-            char_count = values.character_count;
-            char_lim = values.character_limit;
-        }
-        document.getElementById('deepl_character_count').innerHTML = "Characters left on Deepl: "+(char_lim-char_count);
-    });
-    //return {character_count: char_count, character_limit: char_lim};
-}
-
 /**
- * ! The ID of each list element consists of its lastModified-value concatenated with its size - both as strings!
- * TODO Check each Element if it is really a JPG -> Open New Window and Communicate to user if one or more elements are not JPEG
+ * ! The ID of each list element consists of its lastModified-value concatenated with its size
+ * ! - both as strings!
  * @param {event} event The Parameter passed from HTML-ondrop to the script.
  */
 // eslint-disable-next-line no-unused-vars
-function handleDrop(event){
-    function createAndAssignInnerHtml(el_type, inner){
-        let el = document.createElement(el_type);
-        el.innerHTML = inner;
-        return el;
-    }
 
-    event.preventDefault();
-    //hide call, show file-list
-    document.getElementById('call_for_drop').style.display = "none";
-    document.getElementById('file_list').style.display = "table";
-    //add dropped items to list
-    var table_body = document.getElementById('table_body');
-    var files = event.dataTransfer.files;
-    for (var file of files){
-        var new_entry = document.createElement('tr');
-        new_entry.id = (file.lastModified.toString() + file.size.toString());
-        var image_elem = document.createElement('img');
-        image_elem.src = file.path;
-        var children = [
-            createAndAssignInnerHtml('td',file.name),
-            createAndAssignInnerHtml('td', 'N/A'),
-            document.createElement('td').appendChild(image_elem)
-        ];
-        for (var child of children){
-            new_entry.appendChild(child);
-        }
-        table_body.appendChild(new_entry);
-    }
-    /*
-    TODO Active beibehalten wenn clicked, rechtsklick, auswahl, mehrfachauswahl und löschen
-    var all_entries = document.getElementsByTagName('tr');
-    for (entry of all_entries){
-        entry.addEventListener('click', )
-    }
-    */
-    //return false;
+// TODO check each element if jpeg
+// eslint-disable-next-line no-unused-vars
+function handleDrop(event) {
+  function createAndAssignInnerHtml(elType, inner) {
+    // eslint-disable-next-line no-undef
+    const el = document.createElement(elType);
+    el.innerHTML = inner;
+    return el;
+  }
+
+  event.preventDefault();
+  // do nothing if metadatahandler is not ready
+  if ($('#metadatahandler_status').css('color') !== 'rgb(0, 255, 0)') return;
+  // hide call, show file-list
+  $('#call_for_drop').css('display', 'none');
+  $('#file_list').css('display', 'table');
+  // add dropped items to list
+  const tableBody = $('tbody');
+  const { files } = event.dataTransfer;
+  let children = [];
+  let totalCharCount = 0;
+  for (const file of files) {
+    // eslint-disable-next-line no-undef
+    if (document.getElementById(file.path.replace(/\s/g, ''))) continue; // skip if element already exists
+    metadatahandlerStub.requestKeywordsAndCaption(file.path).then((keysAndCaps) => {
+      const currentPicCollection = new translator.PicCollection(
+        file.path,
+        keysAndCaps.keywords,
+        keysAndCaps.caption,
+      );
+      picCollectionArray.push(currentPicCollection);
+      const currentCharCount = metadatahandlerStub.countKeysAndCapChars(keysAndCaps);
+      // eslint-disable-next-line no-undef
+      const newEntry = document.createElement('tr');
+      newEntry.id = file.path.replace(/\s/g, '');
+      // eslint-disable-next-line no-undef
+      const imageElem = document.createElement('img');
+      imageElem.src = file.path;
+      totalCharCount += currentCharCount;
+      children = [
+        createAndAssignInnerHtml('td', file.name),
+        createAndAssignInnerHtml('td', currentPicCollection.caption),
+        createAndAssignInnerHtml('td', currentPicCollection.keywords),
+        createAndAssignInnerHtml('td', currentCharCount),
+        // eslint-disable-next-line no-undef
+        document.createElement('td').appendChild(imageElem),
+      ];
+      for (const child of children) {
+        newEntry.appendChild(child);
+      }
+      tableBody.append(newEntry);
+      $('#picture_character_count').text(`Characters in Pictures: ${totalCharCount}`);
+    });
+  }
 }
 
 // eslint-disable-next-line no-unused-vars
-function allowDrop(event){
-    event.preventDefault();
+function allowDrop(event) {
+  event.preventDefault();
 }
-
-function removeFromPictureList(){}
 
 // eslint-disable-next-line no-unused-vars
-function showPreExecutionNotice(){
-    main_process.showPreExecutionNotice();
+function removeAllItemsFromTable() {
+  $('#table_body').empty();
+  $('#file_list').css('display', 'none');
+  $('#call_for_drop').css('display', 'initial');
+  picCollectionArray = [];
 }
 
+const reReadKeywordsAndCaptions = (reReadArray) => {
+  for (let i = 0, currentPicCollection; currentPicCollection = reReadArray[i]; i++) {
+    metadatahandlerStub.requestKeywordsAndCaption(currentPicCollection.picPath).then(
+      (keysAndCaps) => {
+        // eslint-disable-next-line no-undef
+        const currentPicRow = document.getElementById(`${currentPicCollection.picPath.replace(/\s/g, '')}`);
+        currentPicRow.cells[1].innerHTML = keysAndCaps.caption;
+        currentPicRow.cells[2].innerHTML = keysAndCaps.keywords.toString();
+        currentPicRow.cells[3].innerHTML = metadatahandlerStub.countKeywordChars(
+          metadatahandlerStub.countKeysAndCapChars(keysAndCaps),
+        );
+        ipcRenderer.send('progressStep');
+      },
+    );
+  }
+};
+
+const startTranslationRoutine = () => {
+  storage.get('deeplKey', async (error, data) => {
+    if (error) throw error;
+    if (data.deeplKey) {
+      const { deeplKey } = data;
+      // eslint-disable-next-line no-undef
+      const totalPicNumber = document.getElementById('table_body').rows.length;
+      // +++ TRANSLATION +++const mainProcess = remote.require('./main.js');
+      ipcRenderer.send('showProgressWindow', totalPicNumber);
+      picCollectionArray = await translator.getDbTranslationsForMany(picCollectionArray);
+      picCollectionArray = await translator.getDeeplTranslationsForMany(
+        picCollectionArray,
+        deeplKey,
+      );
+      // +++ Writeback +++
+      await Promise.all([
+        await metadatahandlerStub.writeKeywordsAndCaptionForMany(picCollectionArray),
+        // updateDatabase is allowed to fail
+        await metadatahandlerStub.updateDatabaseForMany(picCollectionArray),
+      ]);
+      // +++ RE-READ +++
+      reReadKeywordsAndCaptions(picCollectionArray);
+      // +++ TEARDOWN +++
+      mainProcess.showCompletedWindow();
+    } else {
+      mainProcess.retrieveDeeplKeyViaWindow();
+    }
+  });
+};
+
+// eslint-disable-next-line no-unused-vars
+function showPreExecutionNotice() {
+  if (mainProcess.showPreExecutionNotice() === 0) {
+    startTranslationRoutine();
+  }
+}
+
+const checkServiceHealth = (service, port) => {
+  needle.get(`http://localhost:${port}/actuator/health`, (err, response) => {
+    if (err || response.statusCode !== 200) {
+      $(`#${service}_status`).css('color', 'red');
+    } else {
+      $(`#${service}_status`).css('color', 'lime');
+    }
+  });
+};
+
+/**
+ * Bundled place for all regularly occuring checks, routines, etc.
+ */
+const intervalFunctions = () => {
+  setInterval(() => { checkServiceHealth('metadatahandler', 4711); }, 10000);
+  setInterval(() => { checkServiceHealth('databasehandler', 4712); }, 10000);
+};
+
+const initIntervals = () => {
+  checkServiceHealth('metadatahandler', 4711);
+  checkServiceHealth('databasehandler', 4712);
+  intervalFunctions();
+};
+
+// eslint-disable-next-line no-undef
 window.onload = () => {
-    if (!CWD) CWD = process.cwd();
-    fetchDeeplCharCount(DEEPL_KEY);
-}
-
-
+  fetchDeeplCharCount(null);
+  setTimeout(() => { initIntervals(); }, 5000);
+};

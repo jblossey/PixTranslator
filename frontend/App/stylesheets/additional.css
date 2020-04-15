@@ -3,10 +3,10 @@ img{
     padding: .1em;
     margin: .1em;
     border: 1px solid #ddd;
-    width: auto;
-    max-height: 5em;
-    vertical-align: middle;
+    width: 100%;
 }
+
+td img {vertical-align: bottom;}
 
 .footer_text{
     height: 100%;
@@ -29,4 +29,23 @@ img{
     font-size: 2em;
     vertical-align: middle;
     text-align: center;
+}
+
+table{
+    table-layout: fixed;
+}
+
+td{
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+#progressBar{
+    position: fixed;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    top: 30%;
 }

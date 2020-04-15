@@ -11,6 +11,7 @@
 .mtj.tmp/
 
 # Package Files #
+*.exe
 *.jar
 *.war
 *.nar
@@ -27,13 +28,22 @@ hs_err_pid*
 .settings
 .project
 .classpath
+dist/
 
 *.iml
 .DS_Store
 
 **/node_modules/
 
-**/.vscode
-
 package-lock.json
 **/photon-0.1.2-dist
+
+mwg_guidance.pdf
+
+yarn.lock
+
+.factorypath
+
+/frontend/bin/**
+
+*.db

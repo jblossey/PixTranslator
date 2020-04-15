@@ -1,17 +1,17 @@
 # TODO
 
++ package and auto-update via electron builder (https://github.com/electron-userland/electron-builder)
+
++ probably include https://babeljs.io/docs/en/#jsx-and-react and rewrite dom manipulation with jsx (if possible)
++ Add Github Badges
++ Redesign GUI with Bootstrap and React
 + Make GUI:
-  + DONE 1 Form to put in Deepl Key TODO (checkbox for save/not-save)
   + 1 Main Window
-  + DONE 1 Notice Window pre computation
   + 1 progress Window
   + 1 Notice Window post computation
+  + Manually change Keywords and Caps on the fly
 + Make JS Backend:
-  + DONE Save and Check Deepl Key
-  + DONE call remaining char-count from deepl
   + update character counters (later version)
-  + DONE Bind Routine-Start to Button
-  + Active beibehalten wenn clicked, rechtsklick, auswahl, mehrfachauswahl und löschen
 + Make Java (Apache Commons Imaging) Backend:
   + Check whether database, deeplkey are present
   + character count service

@@ -1,0 +1,28 @@
+server:
+  port: 4711
+  tomcat:
+    accesslog:
+      enabled: true
+spring:
+  application:
+    name: Metadatahandler
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        web:
+#          filter:
+#            CommonsRequestLoggingFilter: DEBUG
+  file:
+    name: "metadatahandler.log"
+    path: "./logs/"

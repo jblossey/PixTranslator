@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.2.5.RELEASE</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+  <groupId>com.pixtranslator.backend.metadatahandler</groupId>
+  <artifactId>metadatahandler</artifactId>
+  <version>0.1.0</version>
+  <name>metadatahandler</name>
+  <description>Exposes an API to Read and Write Keywords and Captions to and from JPGs.</description>
+
+  <properties>
+    <java.version>11</java.version>
+    <spring-cloud.version>Hoxton.SR3</spring-cloud.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-openfeign</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-imaging</artifactId>
+      <version>1.0-alpha1</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/com.adobe.xmp/xmpcore -->
+    <dependency>
+      <groupId>com.adobe.xmp</groupId>
+      <artifactId>xmpcore</artifactId>
+      <version>6.1.10</version>
+    </dependency>
+    <!-- Jackson JSON Processor -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.10.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.15.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- TODO -->
+    <dependency>
+      <groupId>org.springframework.restdocs</groupId>
+      <artifactId>spring-restdocs-mockmvc</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <plugin><!-- TODO -->
+        <groupId>org.asciidoctor</groupId>
+        <artifactId>asciidoctor-maven-plugin</artifactId>
+        <version>1.5.8</version>
+        <executions>
+          <execution>
+            <id>generate-docs</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>process-asciidoc</goal>
+            </goals>
+            <configuration>
+              <backend>html</backend>
+              <doctype>book</doctype>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.springframework.restdocs</groupId>
+            <artifactId>spring-restdocs-asciidoctor</artifactId>
+            <version>${spring-restdocs.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <executable>true</executable>
+          <mainClass>com.pixtranslator.backend.databasehandler.MetadatahandlerApplication</mainClass>
+        </configuration>
+      </plugin>
+      <!-- EXE COMPILATION-->
+      <plugin>
+        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+        <artifactId>launch4j-maven-plugin</artifactId>
+        <version>1.7.25</version>
+        <executions>
+          <execution>
+            <id>l4j-clui</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>console</headerType>
+              <jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
+              <outfile>${project.build.directory}/${project.artifactId}-${project.version}.exe</outfile>
+              <restartOnCrash>true</restartOnCrash>
+              <downloadUrl>http://java.com/download</downloadUrl>
+              <classPath>
+                <mainClass>org.springframework.boot.loader.JarLauncher</mainClass>
+              </classPath>
+              <icon>src/main/resources/icons/standard_backend.ico</icon>
+              <jre>
+                <path>openjdk-jre11-windows64</path>
+                <minVersion>11</minVersion>
+                <runtimeBits>64</runtimeBits>
+              </jre>
+              <versionInfo>
+                <fileVersion>1.0.0.0</fileVersion>
+                <txtFileVersion>${project.version}</txtFileVersion>
+                <fileDescription>${project.name}</fileDescription>
+                <copyright>2020 Jannis Blossey</copyright>
+                <productVersion>1.0.0.0</productVersion>
+                <txtProductVersion>1.0.0.0</txtProductVersion>
+                <productName>${project.name}</productName>
+                <companyName>Jannis Blossey</companyName>
+                <internalName>${project.artifactId}</internalName>
+                <originalFilename>${project.artifactId}-${project.version}.exe</originalFilename>
+              </versionInfo>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

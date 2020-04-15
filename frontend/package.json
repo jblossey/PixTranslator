@@ -1,35 +1,91 @@
 {
-  "name": "iptc_translator",
-  "version": "0.0.1",
-  "description": "A simple GUI for accessing IPTC Tags and Captions and translating them via the Deepl API",
+  "name": "Pixtranslator",
+  "version": "0.1.0-alpha",
+  "description": "Translate your JPEGs Keywords and Caption via Deepl.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder  --linux --win",
+    "release": "electron-builder --publish 'onTagOrDraft'"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/JBlossey/iptc_translator.git"
+    "url": "git+https://github.com/jblossey/PixTranslator.git"
   },
+  "private": true,
   "keywords": [
     "iptc",
+    "exif",
+    "xmp",
     "tags",
     "captions",
     "jpg",
     "metadata",
-    "deepl"
+    "deepl",
+    "translation",
+    "keywords",
+    "photography"
   ],
-  "author": "Jannis Blossey",
+  "author": "Jannis Blossey <jannis@blossey.eu>",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/JBlossey/iptc_translator/issues"
+    "url": "https://github.com/jblossey/PixTranslator/issues"
   },
-  "homepage": "https://gitlab.com/JBlossey/iptc_translator#readme",
+  "homepage": "https://github.com/jblossey/PixTranslator/blob/master/README.md",
+  "build": {
+    "appId": "com.pixtranslator",
+    "productName": "Pixtranslator",
+    "copyright": "Copyright © 2020 ${author}",
+    "asar": true,
+    "extraResources": [{
+      "from": "openjdk-jre11-windows64",
+      "to": "app.asar.unpacked/openjdk-jre11-windows64",
+      "filter": ["**/**"]
+    }],
+    "asarUnpack": [
+      "databasehandler**",
+      "metadatahandler**",
+      "./openjdk-jre11-windows64/**"
+    ],
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": true
+    },
+    "linux": {
+      "target": ["tar.gz", "deb", "snap"],
+      "category": "Graphics"
+    },
+    "snap": {
+      "publish": "github"
+    },
+    "publish": {
+      "provider": "github",
+      "private": true
+    }
+  },
   "dependencies": {
-    "electron": "^6.0.10",
-    "fs-jetpack": "^2.2.2",
-    "request": "^2.88.0"
+    "electron-json-storage": "^4.1.8",
+    "electron-progressbar": "^1.2.0",
+    "electron-unhandled": "^3.0.2",
+    "electron-updater": "^4.2.5",
+    "electron-util": "^0.14.1",
+    "jquery": "^3.4.1",
+    "minimal-request-promise": "^1.5.0",
+    "needle": "^2.3.3",
+    "promise": "^8.1.0",
+    "yarn": "^1.22.4"
   },
   "devDependencies": {
-    "eslint": "^6.4.0"
+    "babel-eslint": "^10.1.0",
+    "electron": "^8.2.0",
+    "electron-builder": "^22.4.1",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "14.1.0",
+    "eslint-plugin-flowtype": "^4.7.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.19.0"
   }
 }

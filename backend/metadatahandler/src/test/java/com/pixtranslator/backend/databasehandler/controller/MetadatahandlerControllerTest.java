@@ -91,7 +91,7 @@ class MetadatahandlerControllerTest {
   @Test
   void shouldWriteNewKeywordsToSampleFile() {
     String[] keywords = {"Foo", "Bar", "Baz"};
-    this.restTemplate.put("http://localhost:" + port + "/updateKeywords?path=" + testPicPath.toString(), keywords);
+    this.restTemplate.postForObject("http://localhost:" + port + "/updateKeywords?path=" + testPicPath.toString(), keywords, Class.class);
     Set<String> response = this.restTemplate.getForObject(
             "http://localhost:" + port + "/getKeywords?path=" + testPicPath.toString(), Set.class);
     assertThat(response)
@@ -103,7 +103,7 @@ class MetadatahandlerControllerTest {
   @Test
   void shouldWriteNewCaptionToSampleFile() {
     String caption = "Foo and Bar and certainly the Baz";
-    this.restTemplate.put("http://localhost:" + port + "/updateCaption?path=" + testPicPath.toString(), caption);
+    this.restTemplate.postForObject("http://localhost:" + port + "/updateCaption?path=" + testPicPath.toString(), caption, Class.class);
     String changedCaption =
             this.restTemplate.getForObject("http://localhost:" + port + "/getCaption?path=" + testPicPath.toString(),
                     String.class);
@@ -117,8 +117,8 @@ class MetadatahandlerControllerTest {
     HashMap<String, String[]> request = new HashMap<>();
     request.put("Keywords", keywords);
     request.put("Caption", new String[] {caption});
-    this.restTemplate.put("http://localhost:" + port + "/updateKeywordsAndCaption?path=" + testPicPath.toString()
-            , request);
+    this.restTemplate.postForObject("http://localhost:" + port + "/updateKeywordsAndCaption?path=" + testPicPath.toString()
+            , request, Class.class);
     Map<String, ArrayList> response = this.restTemplate.getForObject(
             "http://localhost:" + port + "/getKeywordsAndCaption?path=" + testPicPath.toString(), Map.class);
     assertTrue(response.containsKey("Keywords"));

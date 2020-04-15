@@ -6,8 +6,8 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "release": "build"
+    "dist": "electron-builder  --linux --win",
+    "release": "electron-builder --publish -c.snap.publish=github"
   },
   "repository": {
     "type": "git",
@@ -37,18 +37,29 @@
     "appId": "com.pixtranslator",
     "productName": "Pixtranslator",
     "copyright": "Copyright © 2020 ${author}",
+    "asar": true,
+    "extraResources": [{
+      "from": "openjdk-jre11-windows64",
+      "to": "app.asar.unpacked/openjdk-jre11-windows64",
+      "filter": ["**/**"]
+    }],
+    "asarUnpack": [
+      "databasehandler**",
+      "metadatahandler**",
+      "./openjdk-jre11-windows64/**"
+    ],
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "deleteAppDataOnUninstall": true,
-      "publish": {
-        "provider": "github",
-        "private": true
-      }
+      "deleteAppDataOnUninstall": true
     },
     "linux": {
-      "target": "AppImage",
+      "target": ["tar.gz", "deb", "snap"],
       "category": "Graphics"
+    },
+    "publish": {
+      "provider": "github",
+      "private": true
     }
   },
   "dependencies": {
@@ -56,6 +67,7 @@
     "electron-progressbar": "^1.2.0",
     "electron-unhandled": "^3.0.2",
     "electron-updater": "^4.2.5",
+    "electron-util": "^0.14.1",
     "jquery": "^3.4.1",
     "minimal-request-promise": "^1.5.0",
     "needle": "^2.3.3",
@@ -63,8 +75,8 @@
     "yarn": "^1.22.4"
   },
   "devDependencies": {
-    "electron": "^8.2.0",
     "babel-eslint": "^10.1.0",
+    "electron": "^8.2.0",
     "electron-builder": "^22.4.1",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "14.1.0",

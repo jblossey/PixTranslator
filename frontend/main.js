@@ -1,13 +1,17 @@
+/* eslint-disable no-bitwise */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-console */
 const {
   app, BrowserWindow, dialog, ipcMain,
+// electron must be listed in dev dependencies for electronbuilder reasons
+// eslint-disable-next-line import/no-extraneous-dependencies
 } = require('electron');
 const requestPromise = require('minimal-request-promise');
 const unhandled = require('electron-unhandled');
 const ProgressBar = require('electron-progressbar');
 let serverProcess = require('child_process');
-const {autoUpdater} = require("electron-updater");
+const { autoUpdater } = require('electron-updater');
+const { fixPathForAsarUnpack } = require('electron-util');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -35,10 +39,25 @@ const spawnBackendServices = () => {
   // Check operating system
   const { platform } = process;
   backendBinaries.forEach((binary) => {
+    const servicePath = fixPathForAsarUnpack(`${app.getAppPath()}/${binary}`);
     if (platform === 'win32') {
-      serverProcess.execFile(`${app.getAppPath()}/${binary}.exe`);
+      serverProcess.execFile(`${servicePath}.exe`, {
+        cwd: fixPathForAsarUnpack(`${app.getAppPath()}`),
+      }, (err, stdout, stderr) => {
+        if (err) throw err;
+        console.info(stdout);
+      });
+      /* serverProcess.execFile('cmd.exe', ['/c', `${binary}.exe`],
+        {
+          cwd: fixPathForAsarUnpack(`${app.getAppPath()}`),
+        }); */
     } else {
-      serverProcess.execFile(`${app.getAppPath()}/${binary}.jar`);
+      serverProcess.execFile(`${servicePath}.jar`, {
+        cwd: fixPathForAsarUnpack(`${app.getAppPath()}`),
+      }, (err, stdout, stderr) => {
+        if (err) throw err;
+        console.info(stdout);
+      });
     }
     /*
     if (platform === 'win32') {
@@ -191,7 +210,7 @@ exports.showCompletedWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  //autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdatesAndNotify();
   spawnBackendServices();
   startGui();
   ipcMain.on('showProgressWindow', (event, message) => showProgressWindow(message));

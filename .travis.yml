@@ -3,12 +3,7 @@ sudo: required
 dist: xenial
 services: docker
 language: generic
-addons:
-  apt:
-    packages:
-      - oraclejdk11
-      - maven
-jdk: oraclejdk11
+jdk: openjdk11
 env:
   global:
     secure: "sHpoW7ZY0YWXIBoR4+xw/zoKRcTUft0LnSII1Sgppkp41G33hIce+mJARTJXzpp9G7kKPH6hK88IEnU/sZ8K3bd5QWf2RWlK54JUGEUdladVESMRWxSTngtaPAUJy03hL5IYXgaWKMVrm443yR93W0wfyY/+m5gGWN7CmZw4lP97Ham7ye3W0QMX6S8Qh+cR6jb99V7+8GICAGi+P6fvGQszkswJ1/932GKdTtbie0R/TlHXFpKBLkK7ahaW8E6lk2DZ1XGfZ35cqz19232KjR7+mAa/cv6b9mtLfvi/ySW57ONMVSZmNi+hmrv0rDyKrR+CV83E0zUoDU06PMmheJkmgaN+DikY/FFFNi+vJ8YppmMRYJ00EuVgi4IX7+RLy5Ee4zkJvx0lJQ2TuDGVH7fy8FlXup5Rctk/LhVQ5IFyWdoLECsZv2SG0PjXaPsiNctb3D7m3F97HCtR22duKIAFsvGjMnu6RW9QoeXV3BzFeSApg8PbzpzWjIqP+aG20RvnHWoUYUSLtFuXZQaGhQvhkbJ4VjtLlan7xV12AYvBhB6+5Wt6yqWPpvje9m4zCfI0it1uWHgPU13Z0q/Kw2FDPWOs5JQO4DofOQtEF77Qh1NTtRE3lI5RYeDTD4Abx8BuW5bmJrj51/acgavpqDcatWhd2GouaC0FqHay6iI="

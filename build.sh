@@ -1,5 +1,7 @@
 #!/bin/bash
 
+su
+
 cd backend
 
 mvn clean install package

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo apt-get install openjdk-11-jdk-headless maven -y
+
 cd backend
 
 mvn clean install package

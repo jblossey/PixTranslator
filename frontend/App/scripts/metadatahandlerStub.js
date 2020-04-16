@@ -4,9 +4,12 @@
 const needle = require('needle');
 const Promise = require('promise');
 const { ipcRenderer } = require('electron');
+const unhandled = require('electron-unhandled');
 const assert = require('assert');
 // eslint-disable-next-line import/no-unresolved
 const { translationMappingUnion } = require('./setMethods');
+
+unhandled();
 
 exports.requestKeywordsAndCaption = (picPath) => new Promise((fulfill, reject) => {
   let keywords;
@@ -54,7 +57,7 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
         console.info(`Done with ${picCollection.picPath}`);
         fulfill('done');
       } else {
-        console.error(`+++++++++++
+        unhandled.logError(`+++++++++++
         Error writing to ${picCollection.picPath}.
         Response Status: ${response.statusCode}, ${response.statusMessage}
         Response body: ${response.body}

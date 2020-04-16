@@ -187,6 +187,7 @@ const startTranslationRoutine = () => {
       reReadKeywordsAndCaptions(picCollectionArray);
       // +++ TEARDOWN +++
       mainProcess.showCompletedWindow();
+      fetchDeeplCharCount(deeplKey);
     } else {
       mainProcess.retrieveDeeplKeyViaWindow();
     }

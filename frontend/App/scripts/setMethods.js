@@ -1,3 +1,7 @@
+const unhandled = require('electron-unhandled');
+
+unhandled();
+
 exports.setDifference = (minuend, subtrahend) => minuend.filter((x) => !subtrahend.includes(x));
 
 exports.setUnion = (...args) => [...new Set([...args.flat(Infinity)])];

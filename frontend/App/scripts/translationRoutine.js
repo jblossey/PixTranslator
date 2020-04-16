@@ -5,8 +5,11 @@
 const { ipcRenderer } = require('electron');
 const Promise = require('promise');
 const needle = require('needle');
+const unhandled = require('electron-unhandled');
 // eslint-disable-next-line import/no-unresolved
 const { setDifference } = require('./setMethods');
+
+unhandled();
 
 class PicCollection {
   constructor(picPath, keywords, caption) {

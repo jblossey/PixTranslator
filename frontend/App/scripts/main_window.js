@@ -15,8 +15,6 @@ const translator = require('./scripts/translationRoutine');
 
 const mainProcess = remote.require('./main.js');
 
-// '27c44ce2-ddbb-47ed-e8c6-1809382b6000';// TODO delete
-
 let picCollectionArray = [];
 
 let charCount;

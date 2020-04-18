@@ -16,13 +16,11 @@ management:
       show-details: always
     shutdown:
       enabled: true
-#logging:
-#  level:
-#    org:
-#      springframework:
-#        web:
-#          filter:
-#            CommonsRequestLoggingFilter: DEBUG
+logging:
+  level:
+    general: info
   file:
     name: "metadatahandler.log"
     path: "./logs/"
+  group:
+    general: "org.springframework"

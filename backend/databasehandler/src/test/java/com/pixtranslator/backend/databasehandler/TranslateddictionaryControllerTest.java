@@ -23,7 +23,7 @@ class TranslatedictionaryControllerTest {
   private Path testPicPath;
 
   @Test
-  void shouldDumpFileWithoutException() {
-    this.restTemplate.getForObject("http://localhost:" + port + "/dumpDictionary", String.class);
+  void Test() {
+
   }
 }

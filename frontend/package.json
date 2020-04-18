@@ -1,6 +1,6 @@
 {
   "name": "Pixtranslator",
-  "version": "0.1.0-alpha",
+  "version": "0.1.1-alpha",
   "description": "Translate your JPEGs Keywords and Caption via Deepl.",
   "main": "main.js",
   "scripts": {
@@ -13,7 +13,6 @@
     "type": "git",
     "url": "git+https://github.com/jblossey/PixTranslator.git"
   },
-  "private": true,
   "keywords": [
     "iptc",
     "exif",
@@ -61,8 +60,7 @@
       "publish": "github"
     },
     "publish": {
-      "provider": "github",
-      "private": true
+      "provider": "github"
     }
   },
   "dependencies": {

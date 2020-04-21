@@ -21,13 +21,24 @@ import java.util.*;
 
 import static com.adobe.internal.xmp.XMPConst.NS_DC;
 
+/**
+ * Important:
+ * Until https://github.com/apache/commons-imaging/pull/18 is not merged and released
+ * Metadata with special characters that have been written with the Expression Media App
+ * are not resolvable and lead to unresolved characters in the final strings.
+ * This only applies to IPTC IIM (so the old protocol) data.
+ * Thus the code below is commented out although fully functional.
+ */
+
+
 @Slf4j
 public class Metadatareader {
 
   public static Set<String> getKeywords(final File picture) throws ImageReadException, IOException, XMPException {
     Set<String> keywords = new HashSet<>();
-    final ImageMetadata metadata = Imaging.getMetadata(picture);
     final String xmpXmlString = Imaging.getXmpXml(picture);
+    /*
+    final ImageMetadata metadata = Imaging.getMetadata(picture);
 
     if (metadata instanceof JpegImageMetadata) {
       final JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
@@ -42,7 +53,7 @@ public class Metadatareader {
         }
       }
       log.info("Iptc Keywords are: " + keywords.toString());
-    }
+    }*/
     //XMP
     if (xmpXmlString != null && !xmpXmlString.isEmpty()) {
       XMPMeta picXmp = XMPMetaFactory.parseFromString(xmpXmlString);
@@ -77,6 +88,8 @@ public class Metadatareader {
       } else {
         log.warn("Exif.Image.ImageDescription is null!");
       }
+      //Comparison
+      /*
       //IPTC
       IptcRecord iptcCaption = new IptcRecord(IptcTypes.CAPTION_ABSTRACT, "");
       final JpegPhotoshopMetadata photoshopMetadata = jpegMetadata.getPhotoshop();
@@ -89,7 +102,6 @@ public class Metadatareader {
           break;
         }
       }
-      //Comparison
       if (caption.isEmpty() || !exifDescriptionField.getValue().toString().equals(iptcCaption.getValue())) {
         log.warn("IPTC Caption and Exif Description not alike - IPTC: " +
                 (iptcCaption != null ? iptcCaption.getValue() : "null") +
@@ -99,6 +111,7 @@ public class Metadatareader {
           caption = iptcCaption.getValue();
         }
       }
+      */
     }
     //XMP
     if (xmpXmlString != null && !xmpXmlString.isEmpty()) {

@@ -30,45 +30,34 @@ const backendUrls = {
   databasehandler: 'http://localhost:4712',
 };
 
+const backendProcesses = [];
+
 const spawnBackendServices = () => {
   const backendBinaries = [
     'metadatahandler-0.1.0',
     'databasehandler-0.1.0',
   ];
-
   // Check operating system
   const { platform } = process;
   backendBinaries.forEach((binary) => {
     const servicePath = fixPathForAsarUnpack(`${app.getAppPath()}/${binary}`);
+    let childProcess;
     if (platform === 'win32') {
-      serverProcess.execFile(`${servicePath}.exe`, {
+      childProcess = serverProcess.execFile(`${servicePath}.exe`, {
         cwd: fixPathForAsarUnpack(`${app.getAppPath()}`),
       }, (err, stdout, stderr) => {
         if (err) throw err;
         console.info(stdout);
       });
-      /* serverProcess.execFile('cmd.exe', ['/c', `${binary}.exe`],
-        {
-          cwd: fixPathForAsarUnpack(`${app.getAppPath()}`),
-        }); */
     } else {
-      serverProcess.execFile(`${servicePath}.jar`, {
+      childProcess = serverProcess.execFile(`${servicePath}.jar`, {
         cwd: fixPathForAsarUnpack(`${app.getAppPath()}`),
       }, (err, stdout, stderr) => {
         if (err) throw err;
         console.info(stdout);
       });
     }
-    /*
-    if (platform === 'win32') {
-      serverProcess.spawn('cmd.exe', ['/c', `${binary}.exe`],
-        {
-          cwd: `${app.getAppPath()}`,
-        });
-    } else {
-      serverProcess.spawn(`${app.getAppPath()}/${binary}.jar`);
-    }
-    */
+    backendProcesses.push(childProcess);
   });
 };
 
@@ -96,9 +85,14 @@ const startGui = function createMainWindow() {
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
-    // Send shutdown request to all backend services
-    Object.keys(backendUrls).forEach(async (key) => {
-        needle.post(`${backendUrls[key]}/actuator/shutdown`);      
+    // Send shutdown signal to all backend services
+    backendProcesses.forEach((child) => {
+      const success = child.kill('SIGTERM');
+      if (success) {
+        child = null;
+      } else {
+        throw Error(`${child} could not be terminated.`);
+      }
     });
     serverProcess = null;
     // Dereference the window object, usually you would store windows

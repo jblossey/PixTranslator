@@ -69,7 +69,7 @@
       "publish": "github"
     },
     "publish": {
-      "provider": "github",
+      "provider": "github"
     }
   },
   "dependencies": {

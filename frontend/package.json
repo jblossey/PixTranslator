@@ -69,7 +69,8 @@
       "publish": "github"
     },
     "publish": {
-      "provider": "github"
+      "provider": "github",
+      "releaseType": "release"
     }
   },
   "dependencies": {

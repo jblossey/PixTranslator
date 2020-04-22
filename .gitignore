@@ -48,3 +48,4 @@ yarn.lock
 /frontend/bin/**
 
 *.db
+frontend/LOG_FILE_IS_UNDEFINED

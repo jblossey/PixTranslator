@@ -12,6 +12,7 @@ const ProgressBar = require('electron-progressbar');
 let serverProcess = require('child_process');
 const { autoUpdater } = require('electron-updater');
 const { fixPathForAsarUnpack } = require('electron-util');
+const openAboutWindow = require('about-window').default;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -22,7 +23,6 @@ let DEEPL_KEY = null;
 
 // enable user-friendly handling of unhandled errors
 unhandled();
-// TODO Add electron "about this app"-window -> see https://github.com/rhysd/electron-about-window
 // TODO Replace ipc communication with electron router -> see https://github.com/m0n0l0c0/electron-router
 
 const backendUrls = {
@@ -153,6 +153,14 @@ exports.showPreExecutionNotice = () => dialog.showMessageBoxSync(mainWindow, {
   `,
   cancelId: 1,
 });
+
+exports.showAboutWindow = () => {
+  openAboutWindow({
+    icon_path: `${__dirname}/icon.png`,
+    package_json_dir: __dirname,
+    //open_devtools: process.env.NODE_ENV !== 'production',
+  });
+};
 
 function showProgressWindow(totalPicCount) {
   if (progressBarWindow) return;

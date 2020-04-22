@@ -201,6 +201,11 @@ function showPreExecutionNotice() {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
+function showAboutWindow() {
+  mainProcess.showAboutWindow();
+}
+
 const checkServiceHealth = (service, port) => {
   needle.get(`http://localhost:${port}/actuator/health`, (err, response) => {
     if (err || response.statusCode !== 200) {

@@ -20,4 +20,4 @@ docker run --rm \
     -v ~/.cache/electron:/root/.cache/electron \
     -v ~/.cache/electron-builder:/root/.cache/electron-builder \
     electronuserland/builder:wine \
-    /bin/bash -c "yarn && yarn dist && chown -R 1000:1000 . && yarn release"
+    /bin/bash -c "yarn && yarn dist && chown -R 1000:1000 ."

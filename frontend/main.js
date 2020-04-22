@@ -6,7 +6,7 @@ const {
 // electron must be listed in dev dependencies for electronbuilder reasons
 // eslint-disable-next-line import/no-extraneous-dependencies
 } = require('electron');
-const requestPromise = require('minimal-request-promise');
+const needle = require('needle');
 const unhandled = require('electron-unhandled');
 const ProgressBar = require('electron-progressbar');
 let serverProcess = require('child_process');
@@ -96,6 +96,11 @@ const startGui = function createMainWindow() {
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
+    // Send shutdown request to all backend services
+    Object.keys(backendUrls).forEach(async (key) => {
+        needle.post(`${backendUrls[key]}/actuator/shutdown`);      
+    });
+    serverProcess = null;
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
@@ -219,11 +224,6 @@ app.on('ready', () => {
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
-  // Send shutdown request to all backend services
-  Object.keys(backendUrls).forEach(async (key) => {
-    requestPromise.post(`${backendUrls[key]}/actuator/shutdown`);
-  });
-  serverProcess = null;
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {

@@ -38,11 +38,15 @@
     "productName": "Pixtranslator",
     "copyright": "Copyright © 2020 ${author}",
     "asar": true,
-    "extraResources": [{
-      "from": "openjdk-jre11-windows64",
-      "to": "app.asar.unpacked/openjdk-jre11-windows64",
-      "filter": ["**/**"]
-    }],
+    "extraResources": [
+      {
+        "from": "openjdk-jre11-windows64",
+        "to": "app.asar.unpacked/openjdk-jre11-windows64",
+        "filter": [
+          "**/**"
+        ]
+      }
+    ],
     "asarUnpack": [
       "databasehandler**",
       "metadatahandler**",
@@ -54,7 +58,11 @@
       "deleteAppDataOnUninstall": true
     },
     "linux": {
-      "target": ["tar.gz", "deb", "snap"],
+      "target": [
+        "tar.gz",
+        "deb",
+        "snap"
+      ],
       "category": "Graphics"
     },
     "snap": {
@@ -71,7 +79,6 @@
     "electron-updater": "^4.2.5",
     "electron-util": "^0.14.1",
     "jquery": "^3.4.1",
-    "minimal-request-promise": "^1.5.0",
     "needle": "^2.3.3",
     "promise": "^8.1.0",
     "yarn": "^1.22.4"

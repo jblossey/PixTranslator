@@ -42,7 +42,7 @@ exports.countKeysAndCapChars = (keysAndCapToCount) =>
   + keysAndCapToCount.caption[0].length;
 
 exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill, reject) => {
-  const requestURL = `http://localhost:4711/updateKeywordsAndCaption?path=${picCollection.picPath}`;
+  const requestURL = encodeURI(`http://localhost:4711/updateKeywordsAndCaption?path=${picCollection.picPath}`);
   const requestData = {
     Keywords: picCollection.keywords.concat(picCollection.translatedKeywords),
     Caption: [`${picCollection.caption}, ${picCollection.translatedCaption}`],

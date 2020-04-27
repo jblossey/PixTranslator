@@ -1,6 +1,6 @@
 {
   "name": "Pixtranslator",
-  "version": "0.1.3-alpha",
+  "version": "0.1.4-alpha",
   "description": "Translate your JPEGs Keywords and Caption via Deepl.",
   "main": "main.js",
   "scripts": {

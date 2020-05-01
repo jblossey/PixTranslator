@@ -15,6 +15,8 @@ const translator = require('./scripts/translationRoutine');
 
 const mainProcess = remote.require('./main.js');
 
+const { platform } = process;
+
 let picCollectionArray = [];
 
 let charCount;
@@ -87,15 +89,31 @@ function handleDrop(event) {
     return el;
   }
 
+  function isNotOnSameHarddrive(files) {
+    for (const file of files) {
+      if (!file.path.startsWith('C')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   event.preventDefault();
   // do nothing if metadatahandler is not ready
   if ($('#metadatahandler_status').css('color') !== 'rgb(0, 255, 0)') return;
+  const { files } = event.dataTransfer;
+  if (platform === 'win32') {
+    if (isNotOnSameHarddrive(files)) {
+      throw Error(`One or more files are on an external hard drive. 
+        Pixtranslator can't read from external devices.
+        Please move these files to your main system and try again.`);
+    }
+  }
   // hide call, show file-list
   $('#call_for_drop').css('display', 'none');
   $('#file_list').css('display', 'table');
   // add dropped items to list
   const tableBody = $('tbody');
-  const { files } = event.dataTransfer;
   let children = [];
   let totalCharCount = 0;
   for (const file of files) {

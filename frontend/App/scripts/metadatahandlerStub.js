@@ -3,6 +3,7 @@
 /* eslint-disable no-console */
 const needle = require('needle');
 const Promise = require('promise');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const { ipcRenderer } = require('electron');
 const unhandled = require('electron-unhandled');
 const assert = require('assert');
@@ -62,7 +63,7 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
         unhandled.logError(`+++++++++++
         Error writing to ${picCollection.picPath}.
         Response Status: ${response.statusCode}, ${response.statusMessage}
-        Response body: ${response.body}
+        Response body: ${typeof response.body !== 'string' ? response.body.toString() : response.body}
         ++++++++++++++`);
         reject();
       }
@@ -100,7 +101,7 @@ exports.updateDatabaseForOne = (translationMapping) => new Promise((fulfill, rej
         console.error(`+++++++++++
         Error updating DB at mapping ${native} - ${translation}.
         Response Status: ${response.statusCode}, ${response.statusMessage}
-        Response body: ${response.body}
+        Response body: ${typeof response.body !== 'string' ? response.body.toString() : response.body}
         ++++++++++++++`);
         reject();
       } else if (i === translationMapping[0].length - 1) fulfill();

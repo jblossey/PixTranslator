@@ -153,6 +153,10 @@ public class Metadatawriter {
     try (FileOutputStream fos = new FileOutputStream(tempIptc);
          OutputStream os = new BufferedOutputStream(fos)) {
       if (null != jpegMetadata) {
+        // IPTC Captions are restricted to a length of max 2000 characters
+        if(caption.length() > 2000) {
+          caption = caption.substring(0, 2000);
+        }
         IptcRecord iptcCaption = new IptcRecord(IptcTypes.CAPTION_ABSTRACT, caption);
         final JpegPhotoshopMetadata photoshopMetadata = jpegMetadata.getPhotoshop();
         List<IptcRecord> iptcRecordList = photoshopMetadata.photoshopApp13Data.getRecords();

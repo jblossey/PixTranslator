@@ -47,7 +47,7 @@ exports.writeKeywordsAndCaptionForOne = (picCollection) => new Promise((fulfill,
     Keywords: picCollection.keywords.concat(picCollection.translatedKeywords),
     // IPTC Caption must not be longer than 2000 Characters.
     // Everything exceeding this limit is cut off.
-    Caption: [`${picCollection.translatedCaption}, ${picCollection.caption}`.substring(0, 2000)],
+    Caption: [`${picCollection.translatedCaption}, ${picCollection.caption}`],
   };
   const requestOptions = {
     json: true,

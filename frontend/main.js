@@ -13,6 +13,7 @@ let serverProcess = require('child_process');
 const { autoUpdater } = require('electron-updater');
 const { fixPathForAsarUnpack } = require('electron-util');
 const openAboutWindow = require('about-window').default;
+const { sendDebugInfoMail } = require('./App/scripts/userInteraction');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -22,7 +23,8 @@ let progressBarWindow;
 let DEEPL_KEY = null;
 
 // enable user-friendly handling of unhandled errors
-unhandled();
+unhandled({reportButton: error => sendDebugInfoMail(error)});
+
 // TODO Replace ipc communication with electron router -> see https://github.com/m0n0l0c0/electron-router
 
 const backendUrls = {

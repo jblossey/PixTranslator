@@ -74,6 +74,7 @@
   },
   "dependencies": {
     "about-window": "^1.13.2",
+    "aws-sdk": "^2.668.0",
     "electron-json-storage": "^4.1.8",
     "electron-progressbar": "^1.2.0",
     "electron-unhandled": "^3.0.2",
@@ -81,6 +82,7 @@
     "electron-util": "^0.14.1",
     "jquery": "^3.4.1",
     "needle": "^2.3.3",
+    "nodemailer": "^6.4.6",
     "promise": "^8.1.0",
     "yarn": "^1.22.4"
   },

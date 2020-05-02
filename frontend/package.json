@@ -8,7 +8,8 @@
     "pack": "electron-builder --dir",
     "dist": "electron-builder  --linux --win",
     "dist_dev": "electron-builder --linux tar.gz",
-    "release": "electron-builder --publish 'onTagOrDraft'"
+    "release": "electron-builder --publish 'onTagOrDraft'",
+    "test": "ava"
   },
   "repository": {
     "type": "git",
@@ -87,6 +88,7 @@
     "yarn": "^1.22.4"
   },
   "devDependencies": {
+    "ava": "^3.8.1",
     "babel-eslint": "^10.1.0",
     "electron": "^8.2.0",
     "electron-builder": "^22.4.1",

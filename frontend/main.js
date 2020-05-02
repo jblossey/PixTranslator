@@ -11,7 +11,7 @@ const unhandled = require('electron-unhandled');
 const ProgressBar = require('electron-progressbar');
 let serverProcess = require('child_process');
 const { autoUpdater } = require('electron-updater');
-const { fixPathForAsarUnpack } = require('electron-util');
+const { fixPathForAsarUnpack, is } = require('electron-util');
 const openAboutWindow = require('about-window').default;
 const { sendDebugInfoMail } = require('./App/scripts/userInteraction');
 
@@ -44,7 +44,7 @@ const spawnBackendServices = () => {
   backendBinaries.forEach((binary) => {
     const servicePath = fixPathForAsarUnpack(`${app.getAppPath()}/${binary}`);
     let childProcess;
-    if (platform === 'win32') {
+    if (is.windows) {
       childProcess = serverProcess.execFile(`${servicePath}.exe`, {
         cwd: fixPathForAsarUnpack(`${app.getAppPath()}`),
       }, (err, stdout, stderr) => {

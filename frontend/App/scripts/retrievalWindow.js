@@ -1,7 +1,8 @@
 const { remote, ipcRenderer } = require('electron');
 const unhandled = require('electron-unhandled');
+const { sendDebugInfoMail } = require('./scripts/userInteraction');
 
-unhandled();
+unhandled({reportButton: error => sendDebugInfoMail(error)});
 /* eslint-disable no-undef */
 // eslint-disable-next-line no-unused-vars
 function sendInfo() {

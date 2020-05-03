@@ -13,6 +13,7 @@ const unhandled = require('electron-unhandled');
 const metadatahandlerStub = require('./scripts/metadatahandlerStub');
 // eslint-disable-next-line import/no-unresolved
 const translator = require('./scripts/translationRoutine');
+const { sendDebugInfoMail } = require('./scripts/userInteraction');
 
 const mainProcess = remote.require('./main.js');
 
@@ -23,7 +24,7 @@ let picCollectionArray = [];
 let charCount;
 let charLim;
 
-unhandled();
+unhandled({reportButton: error => sendDebugInfoMail(error)});
 
 // TODO handle clicks and multi-select
 

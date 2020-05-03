@@ -9,8 +9,9 @@ const unhandled = require('electron-unhandled');
 const assert = require('assert');
 // eslint-disable-next-line import/no-unresolved
 const { translationMappingUnion } = require('./setMethods');
+const { sendDebugInfoMail } = require('./userInteraction');
 
-unhandled();
+unhandled({reportButton: error => sendDebugInfoMail(error)});
 
 exports.requestKeywordsAndCaption = (picPath) => new Promise((fulfill, reject) => {
   let keywords;

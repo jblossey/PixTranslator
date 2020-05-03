@@ -8,8 +8,9 @@ const needle = require('needle');
 const unhandled = require('electron-unhandled');
 // eslint-disable-next-line import/no-unresolved
 const { setDifference } = require('./setMethods');
+const { sendDebugInfoMail } = require('./userInteraction');
 
-unhandled();
+unhandled({reportButton: error => sendDebugInfoMail(error)});
 
 class PicCollection {
   constructor(picPath, keywords, caption) {

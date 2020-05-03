@@ -1,6 +1,7 @@
 const unhandled = require('electron-unhandled');
+const { sendDebugInfoMail } = require('./userInteraction');
 
-unhandled();
+unhandled({reportButton: error => sendDebugInfoMail(error)});
 
 exports.setDifference = (minuend, subtrahend) => minuend.filter((x) => !subtrahend.includes(x));
 

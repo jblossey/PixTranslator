@@ -1,6 +1,4 @@
 const nodemailer = require('nodemailer');
-const aws = require('aws-sdk');
-const ses = require('nodemailer-ses-transport');
 const unhandled = require('electron-unhandled');
 const { api, fixPathForAsarUnpack, debugInfo } = require('electron-util');
 

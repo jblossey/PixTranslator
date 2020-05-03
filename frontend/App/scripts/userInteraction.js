@@ -23,10 +23,10 @@ Message: ${err.message}
 Debuginfo: ${debugInfo()}`,
         attachments: [
             {
-                path: fixPathForAsarUnpack(`${api.app.getAppPath()}/metadatahandler.log`)
+                path: `${fixPathForAsarUnpack(api.app.getAppPath())}/metadatahandler.log`,
             },
             {
-                path: fixPathForAsarUnpack(`${api.app.getAppPath()}/databasehandler.log`)
+                path: `${fixPathForAsarUnpack(api.app.getAppPath())}/databasehandler.log`,
             }
         ],
     }, (err, info) => {

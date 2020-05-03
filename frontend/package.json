@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder  --linux --win",
+    "dist": "electron-builder  --linux --win --publish always",
     "dist_dev": "electron-builder --linux tar.gz",
     "release": "electron-builder --publish 'onTagOrDraft'",
     "test": "ava"

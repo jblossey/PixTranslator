@@ -75,7 +75,6 @@
   },
   "dependencies": {
     "about-window": "^1.13.2",
-    "aws-sdk": "^2.668.0",
     "electron-json-storage": "^4.1.8",
     "electron-progressbar": "^1.2.0",
     "electron-unhandled": "^3.0.2",

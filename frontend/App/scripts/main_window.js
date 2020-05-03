@@ -7,6 +7,7 @@ const { remote, ipcRenderer } = require('electron');
 const needle = require('needle');
 const storage = require('electron-json-storage');
 const $ = require('jquery');
+const { is } = require('electron-util');
 const unhandled = require('electron-unhandled');
 // eslint-disable-next-line import/no-unresolved
 const metadatahandlerStub = require('./scripts/metadatahandlerStub');
@@ -102,10 +103,10 @@ function handleDrop(event) {
   // do nothing if metadatahandler is not ready
   if ($('#metadatahandler_status').css('color') !== 'rgb(0, 255, 0)') return;
   const { files } = event.dataTransfer;
-  if (platform === 'win32') {
+  if (is.windows) {
     if (isNotOnSameHarddrive(files)) {
       throw Error(`One or more files are on an external hard drive. 
-        Pixtranslator can't read from external devices.
+        Pixtranslator is not allowed to work on external devices.
         Please move these files to your main system and try again.`);
     }
   }

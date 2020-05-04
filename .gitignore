@@ -49,3 +49,6 @@ yarn.lock
 
 *.db
 frontend/LOG_FILE_IS_UNDEFINED
+
+.nyc_output
+coverage

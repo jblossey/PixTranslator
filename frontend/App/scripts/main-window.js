@@ -146,8 +146,8 @@ function handleDrop(event) {
 				createAndAssignInnerHtml('td', currentPicCollection.caption),
 				createAndAssignInnerHtml('td', currentPicCollection.keywords),
 				createAndAssignInnerHtml('td', currentCharCount),
-				// eslint-disable-next-line no-undef
-				document.createElement('td').append(imageElement)
+				// eslint-disable-next-line no-undef, unicorn/prefer-node-append
+				document.createElement('td').appendChild(imageElement)
 			];
 			for (const child of children) {
 				newEntry.append(child);

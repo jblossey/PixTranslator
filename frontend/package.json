@@ -9,7 +9,7 @@
     "dist": "electron-builder  --linux --win",
     "dist_dev": "electron-builder --linux tar.gz",
     "release": "electron-builder --publish 'onTagOrDraft'",
-    "test": "ava"
+    "test": "nyc xo && ava"
   },
   "repository": {
     "type": "git",
@@ -96,6 +96,8 @@
     "eslint-plugin-flowtype": "^4.7.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.19.0"
+    "eslint-plugin-react": "^7.19.0",
+    "nyc": "^15.0.1",
+    "xo": "^0.30.0"
   }
 }

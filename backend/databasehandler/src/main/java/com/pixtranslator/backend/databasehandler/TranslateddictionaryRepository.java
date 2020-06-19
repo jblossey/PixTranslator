@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RepositoryRestResource(collectionResourceRel = "dict", path = "dict")
-public interface TranslateddictionaryRepository extends CrudRepository<Translateddictionary, Serializable> {
+public interface TranslateddictionaryRepository extends CrudRepository<Translateddictionary, Long> {
 
   Translateddictionary findByGerman(@Param("german") String german);
 

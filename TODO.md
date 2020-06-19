@@ -5,3 +5,4 @@
 + Redesign GUI with Bootstrap and React
 + Manually change Keywords and Caps on the fly
 + Treat Captions bigger than 2000 Characters in Backend
++ Check for sufficient firewall rights for java jre

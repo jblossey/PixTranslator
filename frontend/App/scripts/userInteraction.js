@@ -23,14 +23,14 @@ Message: ${err.message}
 Debuginfo: ${debugInfo()}`,
         attachments: [
             {
-                path: fixPathForAsarUnpack(`${api.app.getAppPath()}/metadatahandler.log`)
+                path: `${api.app.getAppPath().replace('app.asar', 'app.asar.unpacked')}/metadatahandler.log`
             },
             {
-                path: fixPathForAsarUnpack(`${api.app.getAppPath()}/databasehandler.log`)
+                path: `${api.app.getAppPath().replace('app.asar', 'app.asar.unpacked')}/databasehandler.log`
             }
         ],
-    }, (err, info) => {
-        if (err) unhandled.logError(err);
+    }, (error, info) => {
+        if (error) unhandled.logError(error);
         if (info) console.info(`${info.envelope}, ${info.messageId}`);
     });
 };

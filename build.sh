@@ -9,7 +9,6 @@ mvn clean install package
 echo "move files"
 mv ./metadatahandler/target/*{.jar,.exe} ../frontend
 mv ./databasehandler/target/*{.jar,.exe} ../frontend
-mvn clean
 
 echo "entering frontend"
 cd ../frontend
@@ -22,6 +21,3 @@ docker run --rm \
     -v ~/.cache/electron-builder:/root/.cache/electron-builder \
     electronuserland/builder:wine \
     /bin/bash -c "yarn && yarn dist && chown -R 1000:1000 ."
-
-rm databasehandler*
-rm metadatahandler*

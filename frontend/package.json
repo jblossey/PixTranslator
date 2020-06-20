@@ -98,6 +98,6 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.19.0",
     "nyc": "^15.0.1",
-    "xo": "^0.30.0"
+    "xo": "^0.32.0"
   }
 }

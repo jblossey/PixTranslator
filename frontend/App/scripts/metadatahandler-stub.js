@@ -42,8 +42,6 @@ exports.writeKeywordsAndCaptionForOne = picCollection => new Promise((resolve, r
 	const requestURL = encodeURI(`http://localhost:4711/updateKeywordsAndCaption?path=${picCollection.picPath}`);
 	const requestData = {
 		Keywords: picCollection.keywords.concat(picCollection.translatedKeywords),
-		// IPTC Caption must not be longer than 2000 Characters.
-		// Everything exceeding this limit is cut off.
 		Caption: [`${picCollection.translatedCaption}, ${picCollection.caption}`]
 	};
 	const requestOptions = {

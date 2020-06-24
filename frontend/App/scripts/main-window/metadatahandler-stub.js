@@ -2,9 +2,8 @@ const needle = require('needle');
 const Promise = require('promise');
 const {ipcRenderer} = require('electron');
 const unhandled = require('electron-unhandled');
-const assert = require('assert');
-const {translationMappingUnion} = require('./set-methods');
-const {sendDebugInfoMail} = require('./user-interaction');
+const {translationMappingUnion} = require('./shared/set-methods');
+const {sendDebugInfoMail} = require('../shared/user-interaction');
 
 unhandled({reportButton: error => sendDebugInfoMail(error)});
 
@@ -83,7 +82,13 @@ exports.updateDatabaseForOne = translationMapping => new Promise((resolve, rejec
 	const requestOptions = {
 		json: true
 	};
-	assert(translationMapping[0].length === translationMapping[1].length);
+
+	if (translationMapping[0].length !== translationMapping[1].length) {
+		reject(new Error(`Mapping of translation and originals was not correct.
+		0:${translationMapping[0].length}
+		1:${translationMapping[1].length}`));
+	}
+
 	if (translationMapping[0].length === 0) {
 		resolve();
 	}
@@ -108,6 +113,7 @@ exports.updateDatabaseForOne = translationMapping => new Promise((resolve, rejec
 });
 
 exports.updateDatabaseForMany = async picCollectionArray => {
+	console.log(`Array before mapping: ${picCollectionArray.length}`);
 	const translationMappingArray = translationMappingUnion(picCollectionArray);
 	await this.updateDatabaseForOne(translationMappingArray);
 };

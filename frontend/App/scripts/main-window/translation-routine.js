@@ -3,8 +3,8 @@ const {ipcRenderer} = require('electron');
 const Promise = require('promise');
 const needle = require('needle');
 const unhandled = require('electron-unhandled');
-const {setDifference} = require('./set-methods');
-const {sendDebugInfoMail} = require('./user-interaction');
+const {setDifference} = require('./shared/set-methods');
+const {sendDebugInfoMail} = require('../shared/user-interaction');
 
 unhandled({reportButton: error => sendDebugInfoMail(error)});
 

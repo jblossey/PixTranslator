@@ -5,11 +5,10 @@ const storage = require('electron-json-storage');
 const $ = require('jquery');
 const {is} = require('electron-util');
 const unhandled = require('electron-unhandled');
-const metadatahandlerStub = require('./scripts/metadatahandler-stub');
-const translator = require('./scripts/translation-routine');
-const {sendDebugInfoMail} = require('./scripts/user-interaction');
-
-const mainProcess = remote.require('./main.js');
+const metadatahandlerStub = require('./scripts/main-window/metadatahandler-stub');
+const translator = require('./scripts/main-window/translation-routine');
+const {sendDebugInfoMail} = require('./scripts/shared/user-interaction');
+const mainProcess = remote.require('./main');
 
 let picCollectionArray = [];
 

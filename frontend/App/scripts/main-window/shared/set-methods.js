@@ -1,5 +1,5 @@
 const unhandled = require('electron-unhandled');
-const {sendDebugInfoMail} = require('./user-interaction');
+const {sendDebugInfoMail} = require('../../shared/user-interaction');
 
 unhandled({reportButton: error => sendDebugInfoMail(error)});
 

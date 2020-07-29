@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,7 +71,7 @@ public class EnglishController {
 
   @PostMapping("/german/{germanWord}/english")
   public ResponseEntity saveMultipleEnglishToGerman(@PathVariable(name = "germanWord") String germanWord,
-                                                    List<String> englishWords){
+                                                    @Valid @RequestBody List<String> englishWords){
     if (germanWord != null && !germanWord.isEmpty()) {
       German german = getGermanFromWord(germanWord);
       List<English> returnList = new ArrayList<>();
@@ -87,9 +86,26 @@ public class EnglishController {
     return new ResponseEntity(HttpStatus.BAD_REQUEST);
   }
 
-  //TODO !!!
   @PostMapping("/german/english")
-  public ResponseEntity saveMultipleEnglishToMultipleGerman(){
-    throw new UnsupportedOperationException("Yet to implement");
+  public ResponseEntity saveMultipleEnglishToMultipleGerman(@Valid @RequestBody Map<String, List<String>> dictionary){
+    if (dictionary.isEmpty()) {
+      return new ResponseEntity(HttpStatus.BAD_REQUEST);
+    } else {
+      Map<German, List<English>> returnDictionary = new HashMap<>();
+      dictionary.forEach((germanWord, englishWords) -> {
+        if (germanWord != null && !germanWord.isEmpty()) {
+          German german = getGermanFromWord(germanWord);
+          List<English> returnList = new ArrayList<>();
+          englishWords.forEach((englishWord) -> {
+            English newEnglish = new English();
+            newEnglish.setWord(englishWord);
+            newEnglish.setGerman(german);
+            returnList.add(newEnglish);
+          });
+          returnDictionary.put(german, returnList);
+        }
+      });
+      return ResponseEntity.ok(returnDictionary);
+    }
   }
 }

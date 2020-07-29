@@ -3,8 +3,6 @@ package com.pixtranslator.backend.databasehandler.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
-import org.atteo.evo.inflector.English;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;

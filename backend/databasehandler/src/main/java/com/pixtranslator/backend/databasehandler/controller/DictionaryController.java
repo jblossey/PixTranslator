@@ -6,6 +6,7 @@ import com.pixtranslator.backend.databasehandler.repository.EnglishRepository;
 import com.pixtranslator.backend.databasehandler.repository.GermanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,22 +15,43 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-public class EnglishController {
+@RequestMapping("/german")
+public class DictionaryController {
 
   @Autowired
-  GermanRepository germanRepository;
+  private GermanRepository germanRepository;
   @Autowired
-  EnglishRepository englishRepository;
+  private EnglishRepository englishRepository;
 
-  @GetMapping({"/german/{germanWord}/english", "/german/english/"})
+  @GetMapping
+  public Iterable<German> getAllGermanWords(){
+    return germanRepository.findAll();
+  }
+
+  @GetMapping("/{germanWord}")
+  public Optional<German> getWord(@PathVariable(name = "germanWord") String germanWord){
+    return germanRepository.findById(germanWord);
+  }
+
+  @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  public German createWord(@Valid @RequestBody German german){
+    return germanRepository.save(german);
+  }
+
+  @PostMapping(produces = MediaType.TEXT_PLAIN_VALUE)
+  public void createMultipleWords(@Valid @RequestBody Iterable<German> germans){
+    germanRepository.saveAll(germans);
+  }
+
+  @GetMapping({"/{germanWord}/english", "/english/"})
   public ResponseEntity getEnglishTranslations(@PathVariable("germanWord") Optional<String> germanWord,
                                                @RequestBody(required = false) List<String> germanWords){
-    if (germanWord.isPresent()){
+    if (germanWord != null && germanWord.isPresent()){
       Optional<German> german = germanRepository.findById(germanWord.get());
       if (german.isPresent()){
-        return ResponseEntity.ok(englishRepository.findAllByGerman(german.get()));
+        List<English> returnList = englishRepository.findAllByGerman(german.get());
+        return ResponseEntity.ok(returnList);
       }
-      return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
     else{
       if (germanWords != null && !germanWords.isEmpty()) {
@@ -43,8 +65,8 @@ public class EnglishController {
         }
         return ResponseEntity.ok(dictionary);
       }
-      return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
+    return new ResponseEntity(HttpStatus.BAD_REQUEST);
   }
 
   public German getGermanFromWord(String germanWord){
@@ -57,9 +79,9 @@ public class EnglishController {
     return german.get();
   }
 
-  @PostMapping("/german/{germanWord}/english")
+  @PostMapping(value = "/{germanWord}/english", consumes = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity saveSingleEnglishToGerman(@PathVariable(name = "germanWord") String germanWord,
-                                             @Valid @RequestBody English english) {
+                                                  @Valid @RequestBody English english) {
     if (germanWord != null && !germanWord.isEmpty()) {
       German german = getGermanFromWord(germanWord);
       english.setGerman(german);
@@ -69,7 +91,7 @@ public class EnglishController {
     return new ResponseEntity(HttpStatus.BAD_REQUEST);
   }
 
-  @PostMapping("/german/{germanWord}/english")
+  @PostMapping(value = "/{germanWord}/english", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity saveMultipleEnglishToGerman(@PathVariable(name = "germanWord") String germanWord,
                                                     @Valid @RequestBody List<String> englishWords){
     if (germanWord != null && !germanWord.isEmpty()) {
@@ -86,8 +108,8 @@ public class EnglishController {
     return new ResponseEntity(HttpStatus.BAD_REQUEST);
   }
 
-  @PostMapping("/german/english")
-  public ResponseEntity saveMultipleEnglishToMultipleGerman(@Valid @RequestBody Map<String, List<String>> dictionary){
+  @PostMapping("/english")
+  public ResponseEntity saveMultipleEnglishToMultipleGerman(@Valid @RequestBody Map<String, List<String>> dictionary) {
     if (dictionary.isEmpty()) {
       return new ResponseEntity(HttpStatus.BAD_REQUEST);
     } else {

@@ -17,8 +17,6 @@ let charLim;
 
 unhandled({reportButton: error => sendDebugInfoMail(error)});
 
-// eslint-disable-next-line no-warning-comments
-
 function fetchDeeplCharCount(key) {
 	if (key === null) {
 		getDeeplKey();

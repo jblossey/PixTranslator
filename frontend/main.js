@@ -20,8 +20,6 @@ let DEEPL_KEY = null;
 // Enable user-friendly handling of unhandled errors
 unhandled({reportButton: error => sendDebugInfoMail(error)});
 
-// TODO Replace ipc communication with electron router -> see https://github.com/m0n0l0c0/electron-router
-
 const backendProcesses = [];
 
 const spawnBackendServices = () => {

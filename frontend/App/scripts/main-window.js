@@ -18,7 +18,6 @@ let charLim;
 unhandled({reportButton: error => sendDebugInfoMail(error)});
 
 // eslint-disable-next-line no-warning-comments
-// TODO handle clicks and multi-select
 
 function fetchDeeplCharCount(key) {
 	if (key === null) {

@@ -40,10 +40,10 @@ public class getEnglishWordTranslationsUnitTest {
   @Test
   public void testGermanNotPresent() {
     Optional<String> germanWord = Optional.of("test");
-    Mockito.when(germanWordRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    Mockito.when(germanWordRepository.findByWordIgnoreCase(Mockito.any())).thenReturn(Optional.empty());
     assertEquals(englishController.getEnglishTranslations(germanWord, null),
             new ResponseEntity(HttpStatus.BAD_REQUEST));
-    Mockito.verify(germanWordRepository).findById(germanWord.get());
+    Mockito.verify(germanWordRepository).findByWordIgnoreCase(germanWord.get());
   }
 
   @Test
@@ -59,7 +59,7 @@ public class getEnglishWordTranslationsUnitTest {
   @Test
   public void testNormalGermanWordOk() {
     Optional<String> germanWord = Optional.of("test");
-    Mockito.when(germanWordRepository.findById(Mockito.any())).thenReturn(Optional.of(new GermanWord()));
+    Mockito.when(germanWordRepository.findByWordIgnoreCase(Mockito.any())).thenReturn(Optional.of(new GermanWord()));
     List<EnglishWord> returnList = new ArrayList<>();
     EnglishWord englishWord = new EnglishWord();
     englishWord.setWord("test");
@@ -68,7 +68,7 @@ public class getEnglishWordTranslationsUnitTest {
     Mockito.when(englishWordRepository.findAllByGermanword(Mockito.any())).thenReturn(returnList);
     assertEquals(englishController.getEnglishTranslations(germanWord, null), ResponseEntity.ok(returnList));
     Mockito.verify(englishWordRepository).findAllByGermanword(Mockito.any());
-    Mockito.verify(germanWordRepository).findById(germanWord.get());
+    Mockito.verify(germanWordRepository).findByWordIgnoreCase(germanWord.get());
   }
 
 }

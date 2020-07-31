@@ -10,6 +10,7 @@ exports.setUnion = (...args) => [...new Set([...args.flat(Infinity)])];
 // This only works because set elements in js are always treated in insertion order;
 // thus in fact providing a sorted set.
 // It also depends on Deepl always translating words in the same way (which has yet to be examined)
+//TODO: fix wrong mapping here!
 exports.translationMappingUnion = picCollectionArray => [
 	picCollectionArray.reduce(
 		(accumulator, currentValue) => this.setUnion(

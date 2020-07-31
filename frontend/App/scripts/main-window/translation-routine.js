@@ -5,6 +5,7 @@ const needle = require('needle');
 const unhandled = require('electron-unhandled');
 const {setDifference} = require('./shared/set-methods');
 const {sendDebugInfoMail} = require('../shared/user-interaction');
+const { error } = require('jquery');
 
 unhandled({reportButton: error => sendDebugInfoMail(error)});
 
@@ -112,7 +113,6 @@ const getDbTranslationsForOne = picCollection => new Promise((resolve, reject) =
 		++++++++++++++`);
 				reject();
 			}
-			// TODO proper handling of single outages during db call
 		} catch (error) {
 			console.error(error);
 			reject(error);
@@ -127,6 +127,56 @@ const getDbTranslationsForMany = async picCollectionArray => {
 	return picCollectionArray;
 };
 
+const getDeeplCaptionTranslation = (originalCaption, authKey, requestUrl, deeplOptions) => new Promise((resolve, reject) => {
+	const requestData = `text=${encodeURIComponent(originalCaption)}`;
+	needle('post', requestUrl, [deeplOptions, requestData]).then(response => {
+		try {
+			if (response.statusCode === 200) {
+				const {translations} = response.body;
+				resolve(translations.shift().text);
+			} else {
+				console.error(`+++++++++++
+		Error getting DeeplTranslation for Caption ${originalCaption}.
+		Response Status: ${response.statusCode}, ${response.statusMessage}
+		Response body: ${response.body}
+		++++++++++++++`);
+				reject();
+			}
+		} catch (error) {
+			console.error(error);
+			reject(error);
+		}
+	});
+});
+
+const getDeeplKeywordsTranslations = (picCollection, authKey, requestUrl, deeplOptions) => new Promise((resolve, reject) => {
+	while (picCollection.toSend) {
+		const maximumDeeplRequestSizedChunk = picCollection.toSend.splice(0, 50);
+		const requestData = maximumDeeplRequestSizedChunk.map(item => `text=${encodeURIComponent(item)}`).join('&');
+		needle('post', requestUrl, [deeplOptions, requestData]).then(response => {
+			try {
+				if (response.statusCode === 200) {
+					const {translations} = response.body;
+					const translationArray = [];
+					translations.map(entry => translationArray.push(entry.text));
+					resolve(translationArray);
+				} else {
+					console.error(`+++++++++++
+			Error getting DeeplTranslation for Keywords of ${picCollection.picPath}.
+			Response Status: ${response.statusCode}, ${response.statusMessage}
+			Response body: ${response.body}
+			++++++++++++++`);
+					reject();
+				}
+			} catch (error) {
+				console.error(error);
+				reject(error);
+			}
+		});
+	}
+});
+
+
 // TODO deepl only accepts up to 50 text entries at once. handle this.
 const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((resolve, reject) => {
 	const requestUrl = 'https://api.deepl.com/v2/translate';
@@ -140,41 +190,23 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((reso
 		// eslint-disable-next-line camelcase
 		split_sentences: '0' // Treat every requestparameter coherently
 	};
-	while (picCollection.toSend) {
-		const maximumDeeplRequestSizedChunk = picCollection.toSend.splice(0, 50);
-		const requestData = maximumDeeplRequestSizedChunk.map(item => `text=${encodeURIComponent(item)}`).join('&');
-		needle('post', requestUrl, [deeplOptions, requestData]).then(response => {
-			try {
-				if (response.statusCode === 200) {
-					const {translations} = response.body;
-					const translationArray = [];
-					// Deepl keeps the order so first element is always the longest (caption, see setter of toSend)
-					picCollection.translatedCaption = translations.shift().text;
-					translations.map(entry => translationArray.push(entry.text));
-					picCollection.translatedKeywords = translationArray;
-					picCollection.translationMapping = [picCollection.toSend.slice(1), translationArray];
-					picCollection.clearToSend();
-					ipcRenderer.send('progressStep');
-					resolve(picCollection);
-				} else {
-					console.error(`+++++++++++
-			Error getting DeeplTranslation for ${picCollection.picPath}.
-			Response Status: ${response.statusCode}, ${response.statusMessage}
-			Response body: ${response.body}
-			++++++++++++++`);
-					reject();
-				}
-				// TODO proper handling of single outages during deepl call
-			} catch (error) {
-				console.error(error);
-				reject(error);
-			}
-		});
-	}
+	const originalCaption = picCollection.toSend.shift();
+	Promise.allSettled([
+		getDeeplCaptionTranslation(originalCaption, authKey, requestUrl, deeplOptions),
+		getDeeplKeywordsTranslations(picCollection, authKey, requestUrl, deeplOptions)
+	]).then(resolvedValue => {
+		const translatedCaption = resolvedValue[0];
+		const translatedKeywords = resolvedValue[1];
+		picCollection.translatedCaption = translatedCaption;
+		picCollection.translatedKeywords = translatedKeywords;
+		picCollection.clearToSend();
+		ipcRenderer.send('progressStep');
+		resolve(picCollection);
+	}, error_ => reject(error_));
 });
 
 const getDeeplTranslationsForMany = async (picCollectionArray, authKey) => {
-	await Promise.all(picCollectionArray.map(async currentPicCollection => {
+	await Promise.allSettled(picCollectionArray.map(async currentPicCollection => {
 		await getDeeplTranslationsForOne(currentPicCollection, authKey);
 	}));
 	return picCollectionArray;
@@ -185,5 +217,7 @@ module.exports = {
 	getDbTranslationsForMany,
 	getDbTranslationsForOne,
 	getDeeplTranslationsForMany,
-	getDeeplTranslationsForOne
+	getDeeplTranslationsForOne,
+	getDeeplCaptionTranslation,
+	getDeeplKeywordsTranslations
 };

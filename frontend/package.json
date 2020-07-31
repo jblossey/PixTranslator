@@ -1,6 +1,6 @@
 {
   "name": "Pixtranslator",
-  "version": "0.1.7-alpha",
+  "version": "0.2.0-alpha",
   "description": "Translate your JPEGs Keywords and Caption via Deepl.",
   "main": "main.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "dist": "electron-builder  --linux --win",
     "dist_dev": "electron-builder --linux tar.gz",
     "release": "electron-builder --publish 'onTagOrDraft'",
-    "test": "nyc xo && ava"
+    "test": "nyc xo && jest"
   },
   "repository": {
     "type": "git",
@@ -87,17 +87,10 @@
     "yarn": "^1.22.4"
   },
   "devDependencies": {
-    "ava": "^3.8.1",
-    "babel-eslint": "^10.1.0",
     "electron": "^8.2.0",
     "electron-builder": "^22.4.1",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "14.1.0",
-    "eslint-plugin-flowtype": "^4.7.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.19.0",
+    "jest": "^26.2.2",
     "nyc": "^15.0.1",
-    "xo": "^0.30.0"
+    "xo": "^0.32.0"
   }
 }

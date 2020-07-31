@@ -3,11 +3,12 @@ const {
 } = require('electron');
 const unhandled = require('electron-unhandled');
 const ProgressBar = require('electron-progressbar');
+const path = require('path');
 let serverProcess = require('child_process');
 const {autoUpdater} = require('electron-updater');
 const {fixPathForAsarUnpack, is} = require('electron-util');
 const openAboutWindow = require('about-window').default;
-const {sendDebugInfoMail} = require('./App/scripts/user-interaction');
+const {sendDebugInfoMail} = require('./App/scripts/shared/user-interaction');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -18,8 +19,6 @@ let DEEPL_KEY = null;
 
 // Enable user-friendly handling of unhandled errors
 unhandled({reportButton: error => sendDebugInfoMail(error)});
-
-// TODO Replace ipc communication with electron router -> see https://github.com/m0n0l0c0/electron-router
 
 const backendProcesses = [];
 
@@ -156,7 +155,7 @@ exports.showPreExecutionNotice = () => dialog.showMessageBoxSync(mainWindow, {
 exports.showAboutWindow = () => {
 	openAboutWindow({
 		// eslint-disable-next-line camelcase
-		icon_path: `${__dirname}/icon.png`,
+		icon_path: path.join(__dirname, 'icon.png'),
 		// eslint-disable-next-line camelcase
 		package_json_dir: __dirname
 		// Open_devtools: process.env.NODE_ENV !== 'production',
@@ -245,5 +244,3 @@ app.on('activate', () => {
 		startGui();
 	}
 });
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

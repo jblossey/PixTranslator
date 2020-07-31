@@ -1,4 +1,5 @@
 {
     "xo.enable": true,
-    "xo.format.enable": true
+    "xo.format.enable": true,
+    "githubPullRequests.telemetry.enabled": false
 }

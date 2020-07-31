@@ -24,6 +24,7 @@ import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -71,20 +72,19 @@ public class Metadatawriter {
       if (null != jpegMetadata) {
         final JpegPhotoshopMetadata photoshopMetadata = jpegMetadata.getPhotoshop();
         List<IptcRecord> iptcRecordList = photoshopMetadata.photoshopApp13Data.getRecords();
-        Collections.sort(iptcRecordList, IptcRecord.COMPARATOR);
+        iptcRecordList.sort(IptcRecord.COMPARATOR);
         //remove old keywords
-        Iterator<IptcRecord> iptcRecordIterator = iptcRecordList.iterator();
-        while (iptcRecordIterator.hasNext()) {
-          IptcRecord currentRecord = iptcRecordIterator.next();
-          if (currentRecord.iptcType.equals(IptcTypes.KEYWORDS)) iptcRecordIterator.remove();
-        }
+        iptcRecordList.removeIf(currentRecord -> currentRecord.iptcType.equals(IptcTypes.KEYWORDS));
         //insert new Keywords
         for (String keyword : keywords) {
-          IptcRecord newRecordKeyword = new IptcRecord(IptcTypes.KEYWORDS, keyword);
+          if (keyword == null) continue;
+          // pre-encode keyword as Latin-1 in case it contains unencodable characters
+          String encodedKeyword = Arrays.toString(keyword.getBytes(StandardCharsets.ISO_8859_1));
+          IptcRecord newRecordKeyword = new IptcRecord(IptcTypes.KEYWORDS, encodedKeyword);
           iptcRecordList.add(newRecordKeyword);
         }
         //sort entries to correct IPTC order
-        Collections.sort(iptcRecordList, IptcRecord.COMPARATOR);
+        iptcRecordList.sort(IptcRecord.COMPARATOR);
         //assemble in new App13 Block and write to file
         PhotoshopApp13Data newPhotoshopApp13Data = new PhotoshopApp13Data(iptcRecordList,
                 photoshopMetadata.photoshopApp13Data.getNonIptcBlocks());

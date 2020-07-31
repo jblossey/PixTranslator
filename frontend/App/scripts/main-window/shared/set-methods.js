@@ -11,6 +11,8 @@ exports.setUnion = (...args) => [...new Set([...args.flat(Infinity)])];
 // thus in fact providing a sorted set.
 // It also depends on Deepl always translating words in the same way (which has yet to be examined)
 //TODO: fix wrong mapping here!
+//! Deprecated (and wrong)
+/*
 exports.translationMappingUnion = picCollectionArray => [
 	picCollectionArray.reduce(
 		(accumulator, currentValue) => this.setUnion(
@@ -22,4 +24,4 @@ exports.translationMappingUnion = picCollectionArray => [
 			accumulator, currentValue.translationMapping[1]
 		), picCollectionArray[0].translationMapping[1]
 	)
-];
+]; */

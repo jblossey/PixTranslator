@@ -2,7 +2,6 @@ const needle = require('needle');
 const Promise = require('promise');
 const {ipcRenderer} = require('electron');
 const unhandled = require('electron-unhandled');
-const {translationMappingUnion} = require('./shared/set-methods');
 const {sendDebugInfoMail} = require('../shared/user-interaction');
 
 unhandled({reportButton: error => sendDebugInfoMail(error)});
@@ -76,44 +75,41 @@ exports.writeKeywordsAndCaptionForMany = async picCollectionArray => {
 	}));
 };
 
-// TODO implement efficient writing to Database
+// TODO Test
 exports.updateDatabaseForOne = translationMapping => new Promise((resolve, reject) => {
-	const requestURL = 'http://localhost:4712/dict';
+	const requestURL = 'http://localhost:4712/germanword/englishword/writemany';
 	const requestOptions = {
 		json: true
 	};
-
-	if (translationMapping[0].length !== translationMapping[1].length) {
-		reject(new Error(`Mapping of translation and originals was not correct.
-		0:${translationMapping[0].length}
-		1:${translationMapping[1].length}`));
-	}
 
 	if (translationMapping[0].length === 0) {
 		resolve();
 	}
 
-	for (let i = 0; i < translationMapping[0].length; i++) {
-		const native = translationMapping[0][i];
-		const translation = translationMapping[1][i];
-		const requestData = {german: native, english: translation};
-		needle('post', requestURL, requestData, requestOptions).then(response => {
-			if (response.statusCode < 200 || response.statusCode >= 300) {
-				console.error(`+++++++++++
-		Error updating DB at mapping ${native} - ${translation}.
-		Response Status: ${response.statusCode}, ${response.statusMessage}
-		Response body: ${typeof response.body === 'string' ? response.body : response.body.toString()}
-		++++++++++++++`);
-				reject();
-			} else if (i === translationMapping[0].length - 1) {
-				resolve();
-			}
-		});
-	}
+	const natives = translationMapping[0];
+	const translations = translationMapping[1];
+	const requestData = {};
+	// eslint-disable-next-line array-callback-return
+	natives.map((native, index) => {
+		requestData.native = [translations[index]];
+	});
+	needle('post', requestURL, requestData, requestOptions).then(response => {
+		if (response.statusCode < 200 || response.statusCode >= 300) {
+			console.error(`+++++++++++
+	Error updating DB for ${translationMapping.toString()}.
+	Response Status: ${response.statusCode}, ${response.statusMessage}
+	Response body: ${typeof response.body === 'string' ? response.body : response.body.toString()}
+	++++++++++++++`);
+			reject();
+		} else {
+			resolve();
+		}
+	});
 });
 
+// TODO test
 exports.updateDatabaseForMany = async picCollectionArray => {
-	console.log(`Array before mapping: ${picCollectionArray.length}`);
-	const translationMappingArray = translationMappingUnion(picCollectionArray);
-	await this.updateDatabaseForOne(translationMappingArray);
+	await Promise.allSettled(picCollectionArray.map(async currentPicCollection => {
+		await this.updateDatabaseForOne(currentPicCollection.translationMapping);
+	}));
 };

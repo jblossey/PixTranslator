@@ -1,11 +1,8 @@
-/* eslint-disable no-cond-assign */
 const {ipcRenderer} = require('electron');
 const Promise = require('promise');
 const needle = require('needle');
 const unhandled = require('electron-unhandled');
-const {setDifference} = require('./shared/set-methods');
 const {sendDebugInfoMail} = require('../shared/user-interaction');
-const { error } = require('jquery');
 
 unhandled({reportButton: error => sendDebugInfoMail(error)});
 
@@ -17,7 +14,7 @@ class PicCollection {
 		this._translatedKeywords = [];
 		this._translatedCaption = '';
 		this._toSend = [caption];
-		this._translationMapping = {};
+		this._translationMapping = [];
 	}
 
 	get picPath() {
@@ -72,52 +69,38 @@ class PicCollection {
 	}
 }
 
-const extractTranslationFromDatabaseCall = dbResponse => {
-	const translations = [];
-	for (let i = 0, translated; translated = dbResponse._embedded.dict[i]; i++) {
-		translations.push(translated.english);
-	}
-
-	return translations;
-};
-
-const extractUntranslatedKeywords = (originalCollection, rawDbResponse) => {
-	const untranslatedArray = [];
-	for (let i = 0, untranslated; untranslated = rawDbResponse._embedded.dict[i]; i++) {
-		untranslatedArray.push(untranslated.german);
-	}
-
-	return setDifference(originalCollection.keywords, untranslatedArray);
-};
-
+// TODO: Test this
 const getDbTranslationsForOne = picCollection => new Promise((resolve, reject) => {
-	let request = 'http://localhost:4712/dict/search/findAllByGermanInIgnoreCase?';
-	const {keywords} = picCollection;
-	for (let i = 0, keyword; keyword = keywords[i]; i++) {
-		request += `german=${encodeURIComponent(keyword)}&`;
-	}
-
-	needle('get', request).then(response => {
-		try {
-			if (response.statusCode === 200) {
-				const jsonBody = JSON.parse(response.body);
-				picCollection.translatedKeywords = extractTranslationFromDatabaseCall(jsonBody);
-				picCollection.toSend = extractUntranslatedKeywords(picCollection, jsonBody);
-				ipcRenderer.send('progressStep');
-				resolve(picCollection);
-			} else {
-				console.error(`+++++++++++
-		Error getting DB translation for ${picCollection.picPath}.
+	// Concurrently send each keyword of one picCollection to the DB
+	Promise.allSettled(picCollection.keywords.map(keyword =>
+		needle('get', `http://localhost:4712/germanword/${encodeURIComponent(keyword)}`).then(response => {
+			try {
+				if (response.statusCode === 200) {
+					if (response.body) {
+						// Add translation to picCollection
+						response.body.englishWords.map(englishWord =>
+							picCollection.translatedKeywords.push(englishWord.word)
+						);
+					} else {
+						// Word not yet in DB -> mark as "to send"
+						picCollection.toSend.push(keyword);
+					}
+				} else {
+					console.error(`+++++++++++
+		Error getting DB translation for keyword ${keyword} of ${picCollection.picPath}.
 		Response Status: ${response.statusCode}, ${response.statusMessage}
 		Response body: ${response.body}
 		++++++++++++++`);
-				reject();
+					reject();
+				}
+			} catch (error) {
+				console.error(error);
 			}
-		} catch (error) {
-			console.error(error);
-			reject(error);
-		}
-	});
+		})
+	)).then(() => {
+		ipcRenderer.send('progressStep');
+		resolve(picCollection);
+	}, error_ => reject(error_));
 });
 
 const getDbTranslationsForMany = async picCollectionArray => {
@@ -150,8 +133,11 @@ const getDeeplCaptionTranslation = (originalCaption, authKey, requestUrl, deeplO
 });
 
 const getDeeplKeywordsTranslations = (picCollection, authKey, requestUrl, deeplOptions) => new Promise((resolve, reject) => {
-	while (picCollection.toSend) {
-		const maximumDeeplRequestSizedChunk = picCollection.toSend.splice(0, 50);
+	const keywordsToSend = picCollection.toSend;
+	// eslint-disable-next-line no-unmodified-loop-condition
+	while (keywordsToSend) {
+		// Never send chunks of more than 50 Word at the same time -> obligation by Deepl API
+		const maximumDeeplRequestSizedChunk = keywordsToSend.splice(0, 50);
 		const requestData = maximumDeeplRequestSizedChunk.map(item => `text=${encodeURIComponent(item)}`).join('&');
 		needle('post', requestUrl, [deeplOptions, requestData]).then(response => {
 			try {
@@ -176,8 +162,14 @@ const getDeeplKeywordsTranslations = (picCollection, authKey, requestUrl, deeplO
 	}
 });
 
+const mapTranslationsToOriginals = (translations, originals) => {
+	if (translations.length === originals.length) {
+		return [originals, translations];
+	}
 
-// TODO deepl only accepts up to 50 text entries at once. handle this.
+	throw new Error('Cannot map. Translationarray and Originalarray are not the same length!');
+};
+
 const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((resolve, reject) => {
 	const requestUrl = 'https://api.deepl.com/v2/translate';
 	const deeplOptions = {
@@ -198,7 +190,8 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((reso
 		const translatedCaption = resolvedValue[0];
 		const translatedKeywords = resolvedValue[1];
 		picCollection.translatedCaption = translatedCaption;
-		picCollection.translatedKeywords = translatedKeywords;
+		picCollection.translatedKeywords = picCollection.translatedKeywords.concat(translatedKeywords);
+		picCollection.translationMapping = mapTranslationsToOriginals(translatedKeywords, picCollection.toSend);
 		picCollection.clearToSend();
 		ipcRenderer.send('progressStep');
 		resolve(picCollection);

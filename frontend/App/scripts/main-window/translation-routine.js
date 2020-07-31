@@ -89,7 +89,6 @@ const extractUntranslatedKeywords = (originalCollection, rawDbResponse) => {
 	return setDifference(originalCollection.keywords, untranslatedArray);
 };
 
-// TODO deepl only accepts up to 50 text entries at once. handle this.
 const getDbTranslationsForOne = picCollection => new Promise((resolve, reject) => {
 	let request = 'http://localhost:4712/dict/search/findAllByGermanInIgnoreCase?';
 	const {keywords} = picCollection;
@@ -128,6 +127,7 @@ const getDbTranslationsForMany = async picCollectionArray => {
 	return picCollectionArray;
 };
 
+// TODO deepl only accepts up to 50 text entries at once. handle this.
 const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((resolve, reject) => {
 	const requestUrl = 'https://api.deepl.com/v2/translate';
 	const deeplOptions = {
@@ -140,34 +140,37 @@ const getDeeplTranslationsForOne = (picCollection, authKey) => new Promise((reso
 		// eslint-disable-next-line camelcase
 		split_sentences: '0' // Treat every requestparameter coherently
 	};
-	const requestData = picCollection.toSend.map(item => `text=${encodeURIComponent(item)}`).join('&');
-	needle('post', requestUrl, [deeplOptions, requestData]).then(response => {
-		try {
-			if (response.statusCode === 200) {
-				const {translations} = response.body;
-				const translationArray = [];
-				// Deepl keeps the order so first element is always the longest (caption, see setter of toSend)
-				picCollection.translatedCaption = translations.shift().text;
-				translations.map(entry => translationArray.push(entry.text));
-				picCollection.translatedKeywords = translationArray;
-				picCollection.translationMapping = [picCollection.toSend.slice(1), translationArray];
-				picCollection.clearToSend();
-				ipcRenderer.send('progressStep');
-				resolve(picCollection);
-			} else {
-				console.error(`+++++++++++
-		Error getting DeeplTranslation for ${picCollection.picPath}.
-		Response Status: ${response.statusCode}, ${response.statusMessage}
-		Response body: ${response.body}
-		++++++++++++++`);
-				reject();
+	while (picCollection.toSend) {
+		const maximumDeeplRequestSizedChunk = picCollection.toSend.splice(0, 50);
+		const requestData = maximumDeeplRequestSizedChunk.map(item => `text=${encodeURIComponent(item)}`).join('&');
+		needle('post', requestUrl, [deeplOptions, requestData]).then(response => {
+			try {
+				if (response.statusCode === 200) {
+					const {translations} = response.body;
+					const translationArray = [];
+					// Deepl keeps the order so first element is always the longest (caption, see setter of toSend)
+					picCollection.translatedCaption = translations.shift().text;
+					translations.map(entry => translationArray.push(entry.text));
+					picCollection.translatedKeywords = translationArray;
+					picCollection.translationMapping = [picCollection.toSend.slice(1), translationArray];
+					picCollection.clearToSend();
+					ipcRenderer.send('progressStep');
+					resolve(picCollection);
+				} else {
+					console.error(`+++++++++++
+			Error getting DeeplTranslation for ${picCollection.picPath}.
+			Response Status: ${response.statusCode}, ${response.statusMessage}
+			Response body: ${response.body}
+			++++++++++++++`);
+					reject();
+				}
+				// TODO proper handling of single outages during deepl call
+			} catch (error) {
+				console.error(error);
+				reject(error);
 			}
-			// TODO proper handling of single outages during deepl call
-		} catch (error) {
-			console.error(error);
-			reject(error);
-		}
-	});
+		});
+	}
 });
 
 const getDeeplTranslationsForMany = async (picCollectionArray, authKey) => {

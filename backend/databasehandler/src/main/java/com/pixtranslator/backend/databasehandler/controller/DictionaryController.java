@@ -1,9 +1,9 @@
 package com.pixtranslator.backend.databasehandler.controller;
 
-import com.pixtranslator.backend.databasehandler.model.English;
-import com.pixtranslator.backend.databasehandler.model.German;
-import com.pixtranslator.backend.databasehandler.repository.EnglishRepository;
-import com.pixtranslator.backend.databasehandler.repository.GermanRepository;
+import com.pixtranslator.backend.databasehandler.model.EnglishWord;
+import com.pixtranslator.backend.databasehandler.model.GermanWord;
+import com.pixtranslator.backend.databasehandler.repository.EnglishWordRepository;
+import com.pixtranslator.backend.databasehandler.repository.GermanWordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,52 +15,55 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/german")
+@RequestMapping("/germanword")
 public class DictionaryController {
 
   @Autowired
-  private GermanRepository germanRepository;
+  private GermanWordRepository germanWordRepository;
   @Autowired
-  private EnglishRepository englishRepository;
+  private EnglishWordRepository englishWordRepository;
 
   @GetMapping
-  public Iterable<German> getAllGermanWords(){
-    return germanRepository.findAll();
+  public Iterable<GermanWord> getAllGermanWords() {
+    return germanWordRepository.findAll();
   }
 
   @GetMapping("/{germanWord}")
-  public Optional<German> getWord(@PathVariable(name = "germanWord") String germanWord){
-    return germanRepository.findById(germanWord);
+  public Optional<GermanWord> getWord(@PathVariable(name = "germanWord") String germanWord) {
+    return germanWordRepository.findByWordIgnoreCase(germanWord);
   }
 
   @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  public German createWord(@Valid @RequestBody German german){
-    return germanRepository.save(german);
+  public GermanWord createWord(@Valid @RequestBody GermanWord germanword) {
+    return germanWordRepository.save(germanword);
   }
 
-  @PostMapping(produces = MediaType.TEXT_PLAIN_VALUE)
-  public void createMultipleWords(@Valid @RequestBody Iterable<German> germans){
-    germanRepository.saveAll(germans);
+  @PostMapping(path = "/writemany", produces = MediaType.TEXT_PLAIN_VALUE)
+  public void createMultipleWords(@Valid @RequestBody List<GermanWord> germans) {
+    germanWordRepository.saveAll(germans);
   }
 
-  @GetMapping({"/{germanWord}/english", "/english/"})
+  @GetMapping({"/{germanWord}/englishword", "/englishword/"})
   public ResponseEntity getEnglishTranslations(@PathVariable("germanWord") Optional<String> germanWord,
-                                               @RequestBody(required = false) List<String> germanWords){
-    if (germanWord != null && germanWord.isPresent()){
-      Optional<German> german = germanRepository.findById(germanWord.get());
-      if (german.isPresent()){
-        List<English> returnList = englishRepository.findAllByGerman(german.get());
+                                               @RequestBody(required = false) List<String> germanWords) {
+    if (germanWord != null && germanWord.isPresent()) {
+      Optional<GermanWord> german = germanWordRepository.findByWordIgnoreCase(germanWord.get());
+      if (german.isPresent()) {
+        List<EnglishWord> returnList = englishWordRepository.findAllByGermanword(german.get());
         return ResponseEntity.ok(returnList);
       }
     }
     else{
       if (germanWords != null && !germanWords.isEmpty()) {
         Map<String, List<String>> dictionary = new HashMap<>();
-        Iterable<German> germans = germanRepository.findAllById(germanWords);
-        for (German german:germans) {
+        List<GermanWord> germans = new ArrayList<>();
+        germanWords.forEach((singleGermanWord) -> {
+          germans.add(germanWordRepository.findByWordIgnoreCase(singleGermanWord).get());
+        });
+        for (GermanWord germanword : germans) {
           dictionary.put(
-                  german.getWord(),
-                  englishRepository.findAllByGerman(german).stream().map(English::getWord).collect(Collectors.toList())
+                  germanword.getWord(),
+                  englishWordRepository.findAllByGermanword(germanword).stream().map(EnglishWord::getWord).collect(Collectors.toList())
           );
         }
         return ResponseEntity.ok(dictionary);
@@ -69,65 +72,65 @@ public class DictionaryController {
     return new ResponseEntity(HttpStatus.BAD_REQUEST);
   }
 
-  public German getGermanFromWord(String germanWord){
-    Optional<German> german = germanRepository.findById(germanWord);
+  public GermanWord getGermanFromWord(String germanWord) {
+    Optional<GermanWord> german = germanWordRepository.findByWordIgnoreCase(germanWord);
     if (!german.isPresent()) {
-      German newGerman = new German();
-      newGerman.setWord(germanWord);
-      return germanRepository.save(newGerman);
+      GermanWord newGermanWord = new GermanWord();
+      newGermanWord.setWord(germanWord);
+      return germanWordRepository.save(newGermanWord);
     }
     return german.get();
   }
 
-  @PostMapping(value = "/{germanWord}/english", consumes = MediaType.TEXT_PLAIN_VALUE)
+  @PostMapping(value = "/{germanWord}/englishword", consumes = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity saveSingleEnglishToGerman(@PathVariable(name = "germanWord") String germanWord,
-                                                  @Valid @RequestBody English english) {
+                                                  @Valid @RequestBody EnglishWord englishWord) {
     if (germanWord != null && !germanWord.isEmpty()) {
-      German german = getGermanFromWord(germanWord);
-      english.setGerman(german);
-      English savedEnglish = englishRepository.save(english);
-      return ResponseEntity.ok(savedEnglish);
+      GermanWord germanword = getGermanFromWord(germanWord);
+      englishWord.setGermanword(germanword);
+      EnglishWord savedEnglishWord = englishWordRepository.save(englishWord);
+      return ResponseEntity.ok(savedEnglishWord);
     }
     return new ResponseEntity(HttpStatus.BAD_REQUEST);
   }
 
-  @PostMapping(value = "/{germanWord}/english", consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/{germanWord}/englishword/writemany", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity saveMultipleEnglishToGerman(@PathVariable(name = "germanWord") String germanWord,
                                                     @Valid @RequestBody List<String> englishWords){
     if (germanWord != null && !germanWord.isEmpty()) {
-      German german = getGermanFromWord(germanWord);
-      List<English> returnList = new ArrayList<>();
-      for (String englishWord:englishWords) {
-        English newEnglish = new English();
-        newEnglish.setWord(englishWord);
-        newEnglish.setGerman(german);
-        returnList.add(englishRepository.save(newEnglish));
+      GermanWord germanword = getGermanFromWord(germanWord);
+      List<EnglishWord> returnList = new ArrayList<>();
+      for (String englishWord : englishWords) {
+        EnglishWord newEnglishWord = new EnglishWord();
+        newEnglishWord.setWord(englishWord);
+        newEnglishWord.setGermanword(germanword);
+        returnList.add(englishWordRepository.save(newEnglishWord));
       }
       return ResponseEntity.ok(returnList);
     }
     return new ResponseEntity(HttpStatus.BAD_REQUEST);
   }
 
-  @PostMapping("/english")
+  @PostMapping("/englishword/writemany")
   public ResponseEntity saveMultipleEnglishToMultipleGerman(@Valid @RequestBody Map<String, List<String>> dictionary) {
     if (dictionary.isEmpty()) {
       return new ResponseEntity(HttpStatus.BAD_REQUEST);
     } else {
-      Map<German, List<English>> returnDictionary = new HashMap<>();
+      Map<GermanWord, List<EnglishWord>> returnDictionary = new HashMap<>();
       dictionary.forEach((germanWord, englishWords) -> {
         if (germanWord != null && !germanWord.isEmpty()) {
-          German german = getGermanFromWord(germanWord);
-          List<English> returnList = new ArrayList<>();
+          GermanWord germanword = getGermanFromWord(germanWord);
+          List<EnglishWord> returnList = new ArrayList<>();
           englishWords.forEach((englishWord) -> {
-            English newEnglish = new English();
-            newEnglish.setWord(englishWord);
-            newEnglish.setGerman(german);
-            returnList.add(newEnglish);
+            EnglishWord newEnglishWord = new EnglishWord();
+            newEnglishWord.setWord(englishWord);
+            newEnglishWord.setGermanword(germanword);
+            returnList.add(englishWordRepository.save(newEnglishWord));
           });
-          returnDictionary.put(german, returnList);
+          returnDictionary.put(germanword, returnList);
         }
       });
-      return ResponseEntity.ok(returnDictionary);
+      return ResponseEntity.ok().build();
     }
   }
 }

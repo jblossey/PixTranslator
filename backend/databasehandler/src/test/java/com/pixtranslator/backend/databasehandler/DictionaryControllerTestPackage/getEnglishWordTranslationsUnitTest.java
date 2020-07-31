@@ -1,16 +1,15 @@
 package com.pixtranslator.backend.databasehandler.DictionaryControllerTestPackage;
 
 import com.pixtranslator.backend.databasehandler.controller.DictionaryController;
-import com.pixtranslator.backend.databasehandler.model.English;
-import com.pixtranslator.backend.databasehandler.model.German;
-import com.pixtranslator.backend.databasehandler.repository.EnglishRepository;
-import com.pixtranslator.backend.databasehandler.repository.GermanRepository;
+import com.pixtranslator.backend.databasehandler.model.EnglishWord;
+import com.pixtranslator.backend.databasehandler.model.GermanWord;
+import com.pixtranslator.backend.databasehandler.repository.EnglishWordRepository;
+import com.pixtranslator.backend.databasehandler.repository.GermanWordRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -24,13 +23,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
-public class getEnglishTranslationsUnitTest {
+public class getEnglishWordTranslationsUnitTest {
 
 
   @MockBean
-  private EnglishRepository englishRepository;
+  private EnglishWordRepository englishWordRepository;
   @MockBean
-  private GermanRepository germanRepository;
+  private GermanWordRepository germanWordRepository;
   @InjectMocks
   private DictionaryController englishController;
 
@@ -41,9 +40,10 @@ public class getEnglishTranslationsUnitTest {
   @Test
   public void testGermanNotPresent() {
     Optional<String> germanWord = Optional.of("test");
-    Mockito.when(germanRepository.findById(Mockito.any())).thenReturn(Optional.empty());
-    assertEquals(englishController.getEnglishTranslations(germanWord, null), new ResponseEntity(HttpStatus.BAD_REQUEST));
-    Mockito.verify(germanRepository).findById(germanWord.get());
+    Mockito.when(germanWordRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    assertEquals(englishController.getEnglishTranslations(germanWord, null),
+            new ResponseEntity(HttpStatus.BAD_REQUEST));
+    Mockito.verify(germanWordRepository).findById(germanWord.get());
   }
 
   @Test
@@ -59,16 +59,16 @@ public class getEnglishTranslationsUnitTest {
   @Test
   public void testNormalGermanWordOk() {
     Optional<String> germanWord = Optional.of("test");
-    Mockito.when(germanRepository.findById(Mockito.any())).thenReturn(Optional.of(new German()));
-    List<English> returnList = new ArrayList<>();
-    English english = new English();
-    english.setWord("test");
-    english.setGerman(new German());
-    returnList.add(english);
-    Mockito.when(englishRepository.findAllByGerman(Mockito.any())).thenReturn(returnList);
+    Mockito.when(germanWordRepository.findById(Mockito.any())).thenReturn(Optional.of(new GermanWord()));
+    List<EnglishWord> returnList = new ArrayList<>();
+    EnglishWord englishWord = new EnglishWord();
+    englishWord.setWord("test");
+    englishWord.setGermanword(new GermanWord());
+    returnList.add(englishWord);
+    Mockito.when(englishWordRepository.findAllByGermanword(Mockito.any())).thenReturn(returnList);
     assertEquals(englishController.getEnglishTranslations(germanWord, null), ResponseEntity.ok(returnList));
-    Mockito.verify(englishRepository).findAllByGerman(Mockito.any());
-    Mockito.verify(germanRepository).findById(germanWord.get());
+    Mockito.verify(englishWordRepository).findAllByGermanword(Mockito.any());
+    Mockito.verify(germanWordRepository).findById(germanWord.get());
   }
 
 }

@@ -1,24 +1,26 @@
 package com.pixtranslator.backend.databasehandler.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
-public class English implements Serializable {
+public class GermanWord implements Serializable {
+
   @Id
   @Getter
   @Setter
   @Column(unique = true)
   private String word;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "german_word")
-  @JsonBackReference
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "germanword")
+  @JsonManagedReference
   @Getter
   @Setter
-  private German german;
+  private List<EnglishWord> englishWords;
+
 }

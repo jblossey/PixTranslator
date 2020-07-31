@@ -9,7 +9,7 @@
     "dist": "electron-builder  --linux --win",
     "dist_dev": "electron-builder --linux tar.gz",
     "release": "electron-builder --publish 'onTagOrDraft'",
-    "test": "nyc xo"
+    "test": "nyc xo && jest"
   },
   "repository": {
     "type": "git",
